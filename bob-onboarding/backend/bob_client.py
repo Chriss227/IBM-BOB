@@ -57,15 +57,19 @@ async def ask_bob(
     if not api_key:
         raise BobClientError("BOB_API_KEY environment variable is not set")
     
-    # Prepare request
+    # Prepare request with IBM Cloud IAM authentication
     headers = {
-        'X-API-Key': api_key,
-        'Content-Type': 'application/json'
+        'Authorization': f'Bearer {api_key}',
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
     }
     
     payload = {
-        'prompt': prompt,
-        'model': model
+        'input': prompt,
+        'parameters': {
+            'max_new_tokens': 2000,
+            'temperature': 0.7
+        }
     }
     
     # Retry logic with exponential backoff
@@ -100,13 +104,26 @@ async def ask_bob(
                 except Exception as e:
                     raise BobClientError(f"Failed to parse Bob API response as JSON: {str(e)}")
                 
-                # Extract text from response
-                if 'text' not in response_data:
-                    raise BobClientError(
-                        f"Bob API response missing 'text' field. Response: {response_data}"
-                    )
+                # Extract text from response (Watson Orchestrate format)
+                # Try different response formats
+                text = None
                 
-                text = response_data['text']
+                if 'results' in response_data and len(response_data['results']) > 0:
+                    # watsonx.ai format
+                    text = response_data['results'][0].get('generated_text', '')
+                elif 'generated_text' in response_data:
+                    # Alternative format
+                    text = response_data['generated_text']
+                elif 'text' in response_data:
+                    # Original format
+                    text = response_data['text']
+                elif 'output' in response_data:
+                    # Watson Orchestrate format
+                    text = response_data['output']
+                else:
+                    raise BobClientError(
+                        f"Bob API response missing expected fields. Response: {response_data}"
+                    )
                 
                 if not text or not isinstance(text, str):
                     raise BobClientError("Bob API returned empty or invalid text response")
