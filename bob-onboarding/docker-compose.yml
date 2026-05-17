@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: bob-onboarding-backend
+    ports:
+      - "8000:8000"
+    environment:
+      - BOB_API_ENDPOINT=${BOB_API_ENDPOINT}
+      - BOB_API_KEY=${BOB_API_KEY}
+      - ENVIRONMENT=${ENVIRONMENT:-development}
+      - ALLOWED_ORIGINS=http://localhost:5173,http://127.0.0.1:5173
+      - MAX_CONCURRENT_ANALYSES=${MAX_CONCURRENT_ANALYSES:-5}
+      - REQUEST_TIMEOUT=${REQUEST_TIMEOUT:-90}
+    env_file:
+      - .env.local
+    volumes:
+      - ./backend:/app
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import httpx; httpx.get('http://localhost:8000/health', timeout=5.0)"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - bob-network
+
+  frontend:
+    image: node:18-alpine
+    container_name: bob-onboarding-frontend
+    working_dir: /app
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_API_BASE_URL=http://localhost:8000
+      - VITE_ENVIRONMENT=${ENVIRONMENT:-development}
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    command: sh -c "npm install && npm run dev -- --host"
+    restart: unless-stopped
+    depends_on:
+      - backend
+    networks:
+      - bob-network
+
+networks:
+  bob-network:
+    driver: bridge
+
+# Made with Bob

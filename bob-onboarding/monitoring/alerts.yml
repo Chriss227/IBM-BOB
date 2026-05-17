@@ -1,0 +1,151 @@
+# Prometheus alert rules for Bob Onboarding Accelerator
+groups:
+  - name: bob_onboarding_alerts
+    interval: 30s
+    rules:
+      # High error rate
+      - alert: HighErrorRate
+        expr: |
+          (
+            sum(rate(http_requests_total{status=~"5.."}[5m]))
+            /
+            sum(rate(http_requests_total[5m]))
+          ) > 0.05
+        for: 5m
+        labels:
+          severity: critical
+          component: backend
+        annotations:
+          summary: "High error rate detected"
+          description: "Error rate is {{ $value | humanizePercentage }} (threshold: 5%)"
+
+      # Slow response time
+      - alert: SlowResponseTime
+        expr: |
+          histogram_quantile(0.95,
+            sum(rate(http_request_duration_seconds_bucket[5m])) by (le)
+          ) > 5
+        for: 5m
+        labels:
+          severity: warning
+          component: backend
+        annotations:
+          summary: "Slow response time detected"
+          description: "P95 response time is {{ $value }}s (threshold: 5s)"
+
+      # Service down
+      - alert: ServiceDown
+        expr: up{job="bob-onboarding-backend"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          component: backend
+        annotations:
+          summary: "Bob Onboarding service is down"
+          description: "Service has been down for more than 1 minute"
+
+      # High memory usage
+      - alert: HighMemoryUsage
+        expr: |
+          (
+            process_resident_memory_bytes{job="bob-onboarding-backend"}
+            /
+            1024 / 1024 / 1024
+          ) > 1.5
+        for: 5m
+        labels:
+          severity: warning
+          component: backend
+        annotations:
+          summary: "High memory usage"
+          description: "Memory usage is {{ $value | humanize }}GB (threshold: 1.5GB)"
+
+      # High CPU usage
+      - alert: HighCPUUsage
+        expr: |
+          rate(process_cpu_seconds_total{job="bob-onboarding-backend"}[5m]) > 0.8
+        for: 5m
+        labels:
+          severity: warning
+          component: backend
+        annotations:
+          summary: "High CPU usage"
+          description: "CPU usage is {{ $value | humanizePercentage }} (threshold: 80%)"
+
+      # Too many concurrent requests
+      - alert: TooManyConcurrentRequests
+        expr: |
+          sum(http_requests_in_progress{job="bob-onboarding-backend"}) > 20
+        for: 2m
+        labels:
+          severity: warning
+          component: backend
+        annotations:
+          summary: "Too many concurrent requests"
+          description: "{{ $value }} concurrent requests (threshold: 20)"
+
+      # Health check failing
+      - alert: HealthCheckFailing
+        expr: |
+          probe_success{job="bob-onboarding-backend"} == 0
+        for: 2m
+        labels:
+          severity: critical
+          component: backend
+        annotations:
+          summary: "Health check is failing"
+          description: "Health check has been failing for more than 2 minutes"
+
+      # Disk space low
+      - alert: DiskSpaceLow
+        expr: |
+          (
+            node_filesystem_avail_bytes{mountpoint="/"}
+            /
+            node_filesystem_size_bytes{mountpoint="/"}
+          ) < 0.1
+        for: 5m
+        labels:
+          severity: warning
+          component: infrastructure
+        annotations:
+          summary: "Disk space is low"
+          description: "Only {{ $value | humanizePercentage }} disk space remaining"
+
+      # Pod restart rate high
+      - alert: HighPodRestartRate
+        expr: |
+          rate(kube_pod_container_status_restarts_total[15m]) > 0.1
+        for: 5m
+        labels:
+          severity: warning
+          component: kubernetes
+        annotations:
+          summary: "High pod restart rate"
+          description: "Pod is restarting frequently: {{ $value }} restarts/min"
+
+      # Bob API errors
+      - alert: BobAPIErrors
+        expr: |
+          sum(rate(bob_api_errors_total[5m])) > 0.1
+        for: 5m
+        labels:
+          severity: warning
+          component: integration
+        annotations:
+          summary: "Bob API errors detected"
+          description: "{{ $value }} Bob API errors per second"
+
+      # Repository clone failures
+      - alert: RepositoryCloneFailures
+        expr: |
+          sum(rate(repository_clone_failures_total[5m])) > 0.05
+        for: 5m
+        labels:
+          severity: warning
+          component: backend
+        annotations:
+          summary: "Repository clone failures"
+          description: "{{ $value }} clone failures per second"
+
+# Made with Bob

@@ -5,14 +5,15 @@ Analyzes GitHub repositories using IBM Bob AI.
 import asyncio
 import json
 from typing import Dict, Any
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel, HttpUrl, validator
 import logging
 
-from repo_reader import clone_and_read, RepoReaderError
-from bob_client import ask_bob, BobClientError
-from prompt_templates import (
+from backend.repo_reader import clone_and_read, RepoReaderError
+from backend.bob_client import ask_bob, BobClientError
+from backend.prompt_templates import (
     create_architecture_prompt,
     create_flows_prompt,
     create_guide_prompt
@@ -149,19 +150,12 @@ async def analyze_repository(request: AnalyzeRequest):
         
         # Step 3: Call Bob AI in parallel
         logger.info("Calling Bob AI (3 parallel requests)...")
-        try:
-            architecture_raw, flows_raw, guide_raw = await asyncio.gather(
-                ask_bob(architecture_prompt),
-                ask_bob(flows_prompt),
-                ask_bob(guide_prompt)
-            )
-            logger.info("Bob AI analysis complete")
-        except BobClientError as e:
-            logger.error(f"Bob AI error: {str(e)}")
-            raise HTTPException(
-                status_code=500,
-                detail=f"Failed to get response from Bob AI: {str(e)}"
-            )
+        architecture_raw, flows_raw, guide_raw = await asyncio.gather(
+            ask_bob(architecture_prompt),
+            ask_bob(flows_prompt),
+            ask_bob(guide_prompt)
+        )
+        logger.info("Bob AI analysis complete")
         
         # Step 4: Parse and validate responses
         logger.info("Parsing Bob responses...")
@@ -231,6 +225,13 @@ async def analyze_repository(request: AnalyzeRequest):
             detail=f"Failed to read repository: {str(e)}"
         )
     
+    except BobClientError as e:
+        logger.error(f"Bob AI error: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to get response from Bob AI: {str(e)}"
+        )
+    
     except HTTPException:
         # Re-raise HTTP exceptions as-is
         raise
@@ -245,21 +246,27 @@ async def analyze_repository(request: AnalyzeRequest):
 
 # Error handlers
 @app.exception_handler(404)
-async def not_found_handler(request, exc):
+async def not_found_handler(request: Request, exc: HTTPException):
     """Handle 404 errors."""
-    return {
-        "error": "Not Found",
-        "detail": "The requested endpoint does not exist"
-    }
+    return JSONResponse(
+        status_code=404,
+        content={
+            "error": "Not Found",
+            "detail": "The requested endpoint does not exist"
+        }
+    )
 
 
 @app.exception_handler(500)
-async def internal_error_handler(request, exc):
+async def internal_error_handler(request: Request, exc: Exception):
     """Handle 500 errors."""
-    return {
-        "error": "Internal Server Error",
-        "detail": "An unexpected error occurred"
-    }
+    return JSONResponse(
+        status_code=500,
+        content={
+            "error": "Internal Server Error",
+            "detail": "An unexpected error occurred"
+        }
+    )
 
 
 if __name__ == "__main__":
