@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: bob-onboarding-backend
+    env: python
+    region: oregon
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: cd bob-onboarding/backend && uvicorn main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: BOB_API_ENDPOINT
+        sync: false
+      - key: BOB_API_KEY
+        sync: false
+      - key: PYTHON_VERSION
+        value: 3.11.0
+
+# Made with Bob
