@@ -11,9 +11,9 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel, HttpUrl, validator
 import logging
 
-from backend.repo_reader import clone_and_read, RepoReaderError
-from backend.bob_client import ask_bob, BobClientError
-from backend.prompt_templates import (
+from repo_reader import clone_and_read, RepoReaderError
+from bob_client import ask_bob, BobClientError
+from prompt_templates import (
     create_architecture_prompt,
     create_flows_prompt,
     create_guide_prompt

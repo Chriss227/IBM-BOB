@@ -6,7 +6,7 @@ services:
     plan: free
     runtime: python
     buildCommand: chmod +x render-build.sh && ./render-build.sh
-    startCommand: cd bob-onboarding/backend && uvicorn main:app --host 0.0.0.0 --port $PORT
+    startCommand: cd bob-onboarding/backend && python -m uvicorn main:app --host 0.0.0.0 --port $PORT
     envVars:
       - key: BOB_API_ENDPOINT
         sync: false

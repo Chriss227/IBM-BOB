@@ -1,1 +1,1 @@
-web: cd bob-onboarding/backend && uvicorn main:app --host 0.0.0.0 --port $PORT
+web: cd bob-onboarding/backend && python -m uvicorn main:app --host 0.0.0.0 --port $PORT
