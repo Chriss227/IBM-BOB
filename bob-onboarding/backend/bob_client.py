@@ -7,12 +7,52 @@ import httpx
 from typing import Optional
 from pathlib import Path
 from dotenv import load_dotenv
+import json
 
 # Load environment variables from project root
 # Get the project root directory (2 levels up from this file)
 project_root = Path(__file__).parent.parent
 env_path = project_root / '.env'
 load_dotenv(dotenv_path=env_path)
+
+
+async def get_iam_token(api_key: str) -> str:
+    """
+    Get IBM Cloud IAM access token from API key.
+    
+    Args:
+        api_key: IBM Cloud API key
+        
+    Returns:
+        IAM access token
+        
+    Raises:
+        BobClientError: If token generation fails
+    """
+    iam_url = "https://iam.cloud.ibm.com/identity/token"
+    
+    headers = {
+        "Content-Type": "application/x-www-form-urlencoded",
+        "Accept": "application/json"
+    }
+    
+    data = {
+        "grant_type": "urn:ibm:params:oauth:grant-type:apikey",
+        "apikey": api_key
+    }
+    
+    try:
+        async with httpx.AsyncClient(timeout=30) as client:
+            response = await client.post(iam_url, headers=headers, data=data)
+            
+            if response.status_code != 200:
+                raise Exception(f"IAM token request failed: {response.status_code} - {response.text}")
+            
+            token_data = response.json()
+            return token_data["access_token"]
+    except Exception as e:
+        from bob_client import BobClientError
+        raise BobClientError(f"Failed to get IAM token: {str(e)}")
 
 
 class BobClientError(Exception):
@@ -57,9 +97,15 @@ async def ask_bob(
     if not api_key:
         raise BobClientError("BOB_API_KEY environment variable is not set")
     
+    # Get IAM token from API key
+    try:
+        iam_token = await get_iam_token(api_key)
+    except Exception as e:
+        raise BobClientError(f"Failed to authenticate with IBM Cloud: {str(e)}")
+    
     # Prepare request with IBM Cloud IAM authentication
     headers = {
-        'Authorization': f'Bearer {api_key}',
+        'Authorization': f'Bearer {iam_token}',
         'Content-Type': 'application/json',
         'Accept': 'application/json'
     }
