@@ -34,7 +34,7 @@ Built for the IBM Bob Hackathon, this tool eliminates the 2-5 day onboarding tim
    - **Environment**: `Python 3`
    - **Region**: `Oregon (US West)`
    - **Branch**: `main`
-   - **Build Command**: `pip install --upgrade pip && pip install -r requirements-prod.txt`
+   - **Build Command**: `chmod +x render-build.sh && ./render-build.sh`
    - **Start Command**: `cd bob-onboarding/backend && uvicorn main:app --host 0.0.0.0 --port $PORT`
 
 6. **Add Environment Variables:**

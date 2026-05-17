@@ -4,7 +4,8 @@ services:
     env: python
     region: oregon
     plan: free
-    buildCommand: pip install --upgrade pip && pip install -r requirements-prod.txt
+    runtime: python
+    buildCommand: chmod +x render-build.sh && ./render-build.sh
     startCommand: cd bob-onboarding/backend && uvicorn main:app --host 0.0.0.0 --port $PORT
     envVars:
       - key: BOB_API_ENDPOINT
@@ -12,6 +13,6 @@ services:
       - key: BOB_API_KEY
         sync: false
       - key: PYTHON_VERSION
-        value: 3.11.9
+        value: 3.11.7
 
 # Made with Bob
