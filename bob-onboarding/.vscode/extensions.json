@@ -1,0 +1,28 @@
+{
+  "recommendations": [
+    // Python Development
+    "ms-python.python",
+    "ms-python.vscode-pylance",
+    "ms-python.debugpy",
+    
+    // JavaScript/React Development
+    "dbaeumer.vscode-eslint",
+    "esbenp.prettier-vscode",
+    "bradlc.vscode-tailwindcss",
+    
+    // General Development
+    "eamodio.gitlens",
+    "streetsidesoftware.code-spell-checker",
+    "usernamehw.errorlens",
+    
+    // File Support
+    "redhat.vscode-yaml",
+    "yzhang.markdown-all-in-one",
+    
+    // Testing
+    "littlefoxteam.vscode-python-test-adapter",
+    "hbenl.vscode-test-explorer"
+  ]
+}
+
+// Made with Bob

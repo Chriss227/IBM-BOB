@@ -27,12 +27,15 @@ build/
 .env.local
 .env.production
 
-# IDE
-.vscode/
+# IDE (keep .vscode for debugging configs)
 .idea/
 *.swp
 *.swo
 *~
+
+# Debug artifacts
+.vscode/.ropeproject/
+.vscode-test/
 
 # OS
 .DS_Store

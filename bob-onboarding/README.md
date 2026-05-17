@@ -4,6 +4,9 @@
 
 Built for the IBM Bob Hackathon, this tool eliminates the 2-5 day onboarding time for new developers by automatically analyzing codebases and generating comprehensive documentation.
 
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new)
+
 ## ✨ Features
 
 - 🏗️ **Architecture Diagrams** - Visual Mermaid diagrams showing system structure
@@ -11,214 +14,157 @@ Built for the IBM Bob Hackathon, this tool eliminates the 2-5 day onboarding tim
 - 📚 **Onboarding Guide** - Complete markdown guide with setup instructions
 - ⚡ **Fast Analysis** - Results in 30-60 seconds
 - 🎨 **Beautiful UI** - Modern, responsive interface built with React + Tailwind
+- 🐛 **Full Debugging Support** - VS Code configurations for Python and React
 
 ## 🛠️ Tech Stack
 
 **Backend:**
-- Python 3.11
-- FastAPI
+- Python 3.11 + FastAPI
 - IBM Bob AI
-- GitPython
+- GitPython for repository analysis
 
 **Frontend:**
-- React 18
-- Vite
+- React 18 + Vite
 - Tailwind CSS
-- Mermaid.js
+- Mermaid.js for diagrams
 - React Markdown
 
-## 📋 Prerequisites
-
-- Python 3.11 or higher
-- Node.js 18 or higher
-- Git
-- IBM Bob API credentials
+**Deployment:**
+- Backend: Render
+- Frontend: Vercel
 
 ## 🚀 Quick Start
 
-### 1. Clone the Repository
+### Local Development
 
 ```bash
+# Clone repository
 git clone <your-repo-url>
 cd bob-onboarding
-```
 
-### 2. Set Up Backend
-
-```bash
-# Navigate to backend directory
+# Backend setup
 cd backend
-
-# Create virtual environment
 python -m venv venv
-
-# Activate virtual environment
-# On Windows:
-venv\Scripts\activate
-# On macOS/Linux:
-source venv/bin/activate
-
-# Install dependencies
+venv\Scripts\activate  # Windows
 pip install -r ../requirements.txt
+copy .env.example .env  # Add your Bob API credentials
+uvicorn main:app --reload
 
-# Create .env file
-cp ../.env.example .env
-
-# Edit .env and add your IBM Bob API credentials
-# BOB_API_ENDPOINT=https://api.ibm.com/bob/v1/chat
-# BOB_API_KEY=your_api_key_here
-```
-
-### 3. Set Up Frontend
-
-```bash
-# Open a new terminal and navigate to frontend directory
+# Frontend setup (new terminal)
 cd frontend
-
-# Install dependencies
 npm install
-```
-
-### 4. Run the Application
-
-**Terminal 1 - Backend:**
-```bash
-cd backend
-# Make sure virtual environment is activated
-uvicorn main:app --reload --port 8000
-```
-
-**Terminal 2 - Frontend:**
-```bash
-cd frontend
 npm run dev
 ```
 
-### 5. Open in Browser
+Open `http://localhost:5173` in your browser!
 
-Navigate to `http://localhost:5173` and start analyzing repositories!
+📖 **Detailed Instructions:** See [DEVELOPMENT.md](DEVELOPMENT.md)
+
+### Production Deployment
+
+**Backend (Render):**
+1. Push code to GitHub
+2. Connect repository to Render
+3. Add environment variables
+4. Deploy automatically
+
+**Frontend (Vercel):**
+1. Connect repository to Vercel
+2. Set `VITE_API_URL` environment variable
+3. Deploy automatically
+
+🚀 **Detailed Instructions:** See [DEPLOYMENT.md](DEPLOYMENT.md)
 
 ## 📖 Usage
 
-1. **Enter a GitHub URL** - Paste any public GitHub repository URL (e.g., `https://github.com/tiangolo/fastapi`)
-2. **Click "Analyze with Bob"** - Wait 30-60 seconds while Bob analyzes the code
-3. **Explore the Results:**
-   - View the architecture diagram
-   - Read through key system flows
-   - Study the onboarding guide
-   - Copy the guide for future reference
+1. **Enter a GitHub URL** - Paste any public repository URL
+2. **Click "Analyze with Bob"** - Wait 30-60 seconds
+3. **Explore Results:**
+   - View architecture diagram
+   - Read key system flows
+   - Study onboarding guide
+   - Copy guide for reference
+
+### Example Repositories to Try
+
+- `https://github.com/tiangolo/fastapi`
+- `https://github.com/pallets/flask`
+- `https://github.com/django/django`
 
 ## 🏗️ Project Structure
 
 ```
 bob-onboarding/
 ├── backend/
-│   ├── main.py              # FastAPI application
-│   ├── repo_reader.py       # Repository cloning and reading
-│   ├── bob_client.py        # IBM Bob API client
-│   └── prompt_templates.py  # AI prompts for analysis
+│   ├── .env.example           # Environment template
+│   ├── main.py                # FastAPI application
+│   ├── bob_client.py          # IBM Bob AI client
+│   ├── repo_reader.py         # Repository analyzer
+│   ├── prompt_templates.py    # AI prompts
+│   └── tests/                 # Backend tests
+│
 ├── frontend/
 │   ├── src/
-│   │   ├── App.jsx          # Main application component
-│   │   ├── api.js           # Backend API client
-│   │   ├── components/      # React components
-│   │   │   ├── RepoInput.jsx
-│   │   │   ├── ArchDiagram.jsx
-│   │   │   ├── FlowCards.jsx
-│   │   │   └── GuidePanel.jsx
-│   │   ├── main.jsx         # React entry point
-│   │   └── index.css        # Tailwind styles
-│   ├── index.html
-│   └── vite.config.js
-├── requirements.txt         # Python dependencies
-├── package.json            # Node dependencies
-└── README.md
+│   │   ├── App.jsx            # Main component
+│   │   ├── api.js             # Backend client
+│   │   ├── components/        # React components
+│   │   └── __tests__/         # Frontend tests
+│   ├── vercel.json            # Vercel config
+│   └── package.json           # Dependencies
+│
+├── .vscode/
+│   ├── launch.json            # Debug configurations
+│   ├── settings.json          # Workspace settings
+│   └── extensions.json        # Recommended extensions
+│
+├── docs/                      # Additional documentation
+├── render.yaml                # Render deployment config
+├── DEVELOPMENT.md             # Local development guide
+├── DEPLOYMENT.md              # Production deployment guide
+└── README.md                  # This file
 ```
 
-## 🔧 Configuration
+## 🐛 Debugging
 
-### Backend Environment Variables
+This project includes complete VS Code debugging configurations:
 
-Create a `.env` file in the root directory:
+### Python Backend
+- Set breakpoints in `.py` files
+- Press `F5` → Select "Python: FastAPI Backend"
+- Debug with hot reload enabled
 
-```env
-BOB_API_ENDPOINT=https://api.ibm.com/bob/v1/chat
-BOB_API_KEY=your_api_key_here
-```
+### React Frontend
+- Set breakpoints in `.jsx` files
+- Press `F5` → Select "Chrome: Frontend"
+- Debug in browser with source maps
 
-### Frontend Configuration
+### Full Stack
+- Press `F5` → Select "Full Stack: Backend + Frontend"
+- Debug both simultaneously
 
-The frontend is configured to connect to `http://localhost:8000` by default. To change this, edit `frontend/src/api.js`:
-
-```javascript
-const API_BASE_URL = 'http://localhost:8000';
-```
+📖 **More Details:** See [DEVELOPMENT.md](DEVELOPMENT.md#-debugging)
 
 ## 🧪 Testing
 
-### Test Backend
-
+### Backend Tests
 ```bash
 cd backend
-
-# Test repository reader
-python repo_reader.py
-
-# Test Bob client (requires valid API credentials)
-python bob_client.py
-
-# Test with a sample repository
-curl -X POST http://localhost:8000/analyze \
-  -H "Content-Type: application/json" \
-  -d '{"url": "https://github.com/tiangolo/fastapi"}'
+pytest                    # Run all tests
+pytest --cov             # With coverage
+pytest -v -s             # Verbose output
 ```
 
-### Test Frontend
-
+### Frontend Tests
 ```bash
 cd frontend
-npm run dev
+npm test                 # Unit tests
+npm run test:e2e        # E2E tests
+npm run test:coverage   # With coverage
 ```
-
-Then open `http://localhost:5173` and test with a repository like:
-- `https://github.com/tiangolo/fastapi`
-- `https://github.com/pallets/flask`
-- `https://github.com/django/django`
-
-## 🐛 Troubleshooting
-
-### Backend Issues
-
-**"BOB_API_ENDPOINT environment variable is not set"**
-- Make sure you've created a `.env` file in the root directory
-- Verify the file contains `BOB_API_ENDPOINT` and `BOB_API_KEY`
-
-**"Git clone failed"**
-- Ensure Git is installed and accessible from command line
-- Check that the repository URL is valid and public
-- Verify you have internet connectivity
-
-**"Failed to get response from Bob"**
-- Verify your Bob API credentials are correct
-- Check that the API endpoint is accessible
-- Ensure you haven't exceeded rate limits
-
-### Frontend Issues
-
-**"Cannot connect to backend server"**
-- Make sure the backend is running on port 8000
-- Check that CORS is properly configured
-- Verify no firewall is blocking the connection
-
-**"Mermaid diagram not rendering"**
-- This is usually due to invalid Mermaid syntax from Bob
-- The app will show a friendly error message
-- The rest of the analysis will still be available
 
 ## 🎯 API Endpoints
 
 ### `POST /analyze`
-
 Analyze a GitHub repository.
 
 **Request:**
@@ -232,14 +178,7 @@ Analyze a GitHub repository.
 ```json
 {
   "architecture_mermaid": "graph LR\n  A[Module] --> B[Module]",
-  "flows": [
-    {
-      "name": "Flow Name",
-      "description": "What it does",
-      "steps": ["Step 1", "Step 2"],
-      "files": ["file.py"]
-    }
-  ],
+  "flows": [...],
   "guide": "# Onboarding Guide\n...",
   "repository_url": "https://github.com/username/repository",
   "files_analyzed": 42
@@ -247,7 +186,6 @@ Analyze a GitHub repository.
 ```
 
 ### `GET /health`
-
 Check backend health status.
 
 **Response:**
@@ -258,40 +196,66 @@ Check backend health status.
 }
 ```
 
-## 🚀 Deployment
+📖 **Full API Documentation:** See [docs/API_DOCUMENTATION.md](docs/API_DOCUMENTATION.md)
 
-### Backend Deployment
+## 🔧 Configuration
 
-The backend can be deployed to any platform that supports Python:
+### Backend Environment Variables
 
-- **Heroku**: Use the included `Procfile`
-- **AWS Lambda**: Package with Mangum
-- **Google Cloud Run**: Use Docker
-- **Azure App Service**: Deploy directly
+Create `backend/.env` from `backend/.env.example`:
 
-### Frontend Deployment
-
-Build the frontend for production:
-
-```bash
-cd frontend
-npm run build
+```env
+BOB_API_ENDPOINT=https://us-south.ml.cloud.ibm.com/ml/v1/text/chat?version=2023-05-29
+BOB_API_KEY=your_api_key_here
+PORT=8000
+ENVIRONMENT=development
 ```
 
-Deploy the `dist/` folder to:
-- **Vercel**: `vercel deploy`
-- **Netlify**: Drag and drop `dist/` folder
-- **GitHub Pages**: Use `gh-pages` package
-- **AWS S3**: Upload to S3 bucket with static hosting
+### Frontend Environment Variables
+
+For production deployment, set in Vercel:
+
+```env
+VITE_API_URL=https://your-backend.onrender.com
+```
+
+## 🐛 Troubleshooting
+
+### Common Issues
+
+**Backend won't start:**
+- Verify virtual environment is activated
+- Check `.env` file exists with valid credentials
+- Ensure port 8000 is not in use
+
+**Frontend can't connect:**
+- Verify backend is running on port 8000
+- Check CORS settings in `backend/main.py`
+- Verify `VITE_API_URL` in production
+
+**Mermaid diagram not rendering:**
+- This is usually due to invalid syntax from Bob
+- The app shows a friendly error message
+- Other analysis results remain available
+
+📖 **More Solutions:** See [DEVELOPMENT.md](DEVELOPMENT.md#-troubleshooting)
+
+## 📚 Documentation
+
+- **[DEVELOPMENT.md](DEVELOPMENT.md)** - Complete local development guide
+- **[DEPLOYMENT.md](DEPLOYMENT.md)** - Production deployment guide
+- **[docs/API_DOCUMENTATION.md](docs/API_DOCUMENTATION.md)** - API reference
+- **[docs/TESTING_GUIDE.md](docs/TESTING_GUIDE.md)** - Testing guide
 
 ## 🤝 Contributing
 
-This project was built for the IBM Bob Hackathon. Contributions are welcome!
+Contributions are welcome! This project was built for the IBM Bob Hackathon.
 
 1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Submit a pull request
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
 ## 📝 License
 
@@ -299,10 +263,11 @@ MIT License - feel free to use this project for your own purposes.
 
 ## 🙏 Acknowledgments
 
-- **IBM Bob AI** - The AI engine that powers this tool
-- **FastAPI** - For the excellent Python web framework
-- **React** - For the powerful UI library
-- **Mermaid.js** - For beautiful diagram rendering
+- **IBM Bob AI** - The AI engine powering this tool
+- **FastAPI** - Excellent Python web framework
+- **React** - Powerful UI library
+- **Mermaid.js** - Beautiful diagram rendering
+- **Render & Vercel** - Easy deployment platforms
 
 ## 📧 Contact
 
@@ -310,4 +275,17 @@ Built with ❤️ for the IBM Bob Hackathon
 
 ---
 
+## 🎯 What's Next?
+
+- [ ] Add support for private repositories
+- [ ] Cache analysis results
+- [ ] Support for more diagram types
+- [ ] Multi-language support
+- [ ] Team collaboration features
+- [ ] Integration with Slack/Teams
+
+---
+
 **Happy Onboarding! 🚀**
+
+*Made with Bob*
