@@ -36,12 +36,14 @@ WORKDIR /app
 COPY --from=builder --chown=appuser:appuser /root/.local /home/appuser/.local
 
 # Copy application code
-COPY --chown=appuser:appuser backend/ .
+COPY --chown=appuser:appuser backend/ ./backend/
+COPY --chown=appuser:appuser requirements.txt .
 
 # Set environment variables
 ENV PATH=/home/appuser/.local/bin:$PATH \
     PYTHONUNBUFFERED=1 \
-    PYTHONDONTWRITEBYTECODE=1
+    PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONPATH=/app
 
 # Switch to non-root user
 USER appuser
@@ -54,6 +56,6 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
 EXPOSE 8000
 
 # Run application
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "8000"]
 
 # Made with Bob

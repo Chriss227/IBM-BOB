@@ -5,10 +5,14 @@ import os
 import asyncio
 import httpx
 from typing import Optional
+from pathlib import Path
 from dotenv import load_dotenv
 
-# Load environment variables
-load_dotenv()
+# Load environment variables from project root
+# Get the project root directory (2 levels up from this file)
+project_root = Path(__file__).parent.parent
+env_path = project_root / '.env'
+load_dotenv(dotenv_path=env_path)
 
 
 class BobClientError(Exception):
