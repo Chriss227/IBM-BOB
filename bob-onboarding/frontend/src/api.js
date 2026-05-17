@@ -2,8 +2,8 @@
  * API client for communicating with the Bob Onboarding Accelerator backend.
  */
 
-// Use environment variable for API URL, fallback to localhost for development
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+// Use environment variable for API URL, fallback to Render production URL
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://ibm-bob-3.onrender.com';
 
 /**
  * Custom error class for API errors.
