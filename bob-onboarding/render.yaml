@@ -4,7 +4,6 @@ services:
     name: bob-onboarding-api
     runtime: python
     plan: free
-    rootDir: bob-onboarding
     buildCommand: pip install -r requirements.txt
     startCommand: uvicorn backend.main:app --host 0.0.0.0 --port $PORT
     envVars:
