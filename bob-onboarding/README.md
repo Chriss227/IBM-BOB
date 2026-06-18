@@ -1,8 +1,8 @@
 # 🤖 Bob Onboarding Accelerator
 
-> Understand any GitHub repository in under 5 minutes using IBM Bob AI
+> Understand any GitHub repository in under 5 minutes using Google Gemini AI
 
-Built for the IBM Bob Hackathon, this tool eliminates the 2-5 day onboarding time for new developers by automatically analyzing codebases and generating comprehensive documentation.
+Powered by Google Gemini 2.5 Flash, this tool eliminates the 2-5 day onboarding time for new developers by automatically analyzing codebases and generating comprehensive documentation.
 
 [![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com)
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new)
@@ -20,7 +20,7 @@ Built for the IBM Bob Hackathon, this tool eliminates the 2-5 day onboarding tim
 
 **Backend:**
 - Python 3.11 + FastAPI
-- IBM Bob AI
+- Google Gemini 2.5 Flash AI
 - GitPython for repository analysis
 
 **Frontend:**
@@ -47,7 +47,7 @@ cd backend
 python -m venv venv
 venv\Scripts\activate  # Windows
 pip install -r ../requirements.txt
-copy .env.example .env  # Add your Bob API credentials
+copy .env.example .env  # Add your Gemini API key
 uvicorn main:app --reload
 
 # Frontend setup (new terminal)
@@ -78,7 +78,7 @@ Open `http://localhost:5173` in your browser!
 ## 📖 Usage
 
 1. **Enter a GitHub URL** - Paste any public repository URL
-2. **Click "Analyze with Bob"** - Wait 30-60 seconds
+2. **Click "Analyze with Bob"** - Wait 20-40 seconds
 3. **Explore Results:**
    - View architecture diagram
    - Read key system flows
@@ -98,7 +98,7 @@ bob-onboarding/
 ├── backend/
 │   ├── .env.example           # Environment template
 │   ├── main.py                # FastAPI application
-│   ├── bob_client.py          # IBM Bob AI client
+│   ├── gemini_client.py       # Google Gemini AI client
 │   ├── repo_reader.py         # Repository analyzer
 │   ├── prompt_templates.py    # AI prompts
 │   └── tests/                 # Backend tests
@@ -205,11 +205,16 @@ Check backend health status.
 Create `backend/.env` from `backend/.env.example`:
 
 ```env
-BOB_API_ENDPOINT=https://us-south.ml.cloud.ibm.com/ml/v1/text/chat?version=2023-05-29
-BOB_API_KEY=your_api_key_here
+GEMINI_API_KEY=your_gemini_api_key_here
 PORT=8000
 ENVIRONMENT=development
 ```
+
+**Get your Gemini API key:**
+1. Visit [Google AI Studio](https://aistudio.google.com/app/apikey)
+2. Sign in with your Google account
+3. Click "Create API Key"
+4. Copy and paste into `.env` file
 
 ### Frontend Environment Variables
 
@@ -263,7 +268,7 @@ MIT License - feel free to use this project for your own purposes.
 
 ## 🙏 Acknowledgments
 
-- **IBM Bob AI** - The AI engine powering this tool
+- **Google Gemini AI** - The AI engine powering this tool
 - **FastAPI** - Excellent Python web framework
 - **React** - Powerful UI library
 - **Mermaid.js** - Beautiful diagram rendering
@@ -271,7 +276,7 @@ MIT License - feel free to use this project for your own purposes.
 
 ## 📧 Contact
 
-Built with ❤️ for the IBM Bob Hackathon
+Built with ❤️ using Google Gemini 2.5 Flash
 
 ---
 
@@ -288,4 +293,4 @@ Built with ❤️ for the IBM Bob Hackathon
 
 **Happy Onboarding! 🚀**
 
-*Made with Bob*
+*Made with Gemini*

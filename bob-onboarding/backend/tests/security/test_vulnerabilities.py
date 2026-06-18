@@ -1,5 +1,5 @@
 """
-Security tests for Bob Onboarding Accelerator.
+Security tests for Bob Onboarding Accelerator with Gemini.
 Tests for common vulnerabilities and security best practices.
 """
 import pytest
@@ -233,4 +233,4 @@ class TestSecurityVulnerabilities:
         # assert "x-frame-options" in headers
         # assert "x-xss-protection" in headers
 
-# Made with Bob
+# Made with Gemini

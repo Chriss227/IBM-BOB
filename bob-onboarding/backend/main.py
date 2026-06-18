@@ -1,6 +1,6 @@
 """
 FastAPI backend for Bob Onboarding Accelerator.
-Analyzes GitHub repositories using IBM Bob AI.
+Analyzes GitHub repositories using Google Gemini AI.
 """
 import asyncio
 import json
@@ -12,7 +12,7 @@ from pydantic import BaseModel, HttpUrl, validator
 import logging
 
 from repo_reader import clone_and_read, RepoReaderError
-from bob_client import ask_bob, BobClientError
+from gemini_client import ask_gemini, GeminiClientError
 from prompt_templates import (
     create_architecture_prompt,
     create_flows_prompt,
@@ -29,8 +29,8 @@ logger = logging.getLogger(__name__)
 # Create FastAPI app
 app = FastAPI(
     title="Bob Onboarding Accelerator",
-    description="Analyze GitHub repositories in under 5 minutes using IBM Bob AI",
-    version="1.0.0"
+    description="Analyze GitHub repositories in under 5 minutes using Google Gemini AI",
+    version="2.0.0"
 )
 
 # Configure CORS
@@ -116,7 +116,7 @@ async def analyze_repository(request: AnalyzeRequest):
     This endpoint:
     1. Clones the repository
     2. Reads all relevant files
-    3. Sends three parallel requests to Bob AI
+    3. Sends three parallel requests to Gemini AI
     4. Returns the combined analysis
     
     Args:
@@ -150,22 +150,22 @@ async def analyze_repository(request: AnalyzeRequest):
         flows_prompt = create_flows_prompt(file_contents)
         guide_prompt = create_guide_prompt(file_contents)
         
-        # Step 3: Call Bob AI in parallel
-        logger.info("Calling Bob AI (3 parallel requests)...")
+        # Step 3: Call Gemini AI in parallel
+        logger.info("Calling Gemini AI (3 parallel requests)...")
         architecture_raw, flows_raw, guide_raw = await asyncio.gather(
-            ask_bob(architecture_prompt),
-            ask_bob(flows_prompt),
-            ask_bob(guide_prompt)
+            ask_gemini(architecture_prompt),
+            ask_gemini(flows_prompt),
+            ask_gemini(guide_prompt)
         )
-        logger.info("Bob AI analysis complete")
+        logger.info("Gemini AI analysis complete")
         
         # Step 4: Parse and validate responses
-        logger.info("Parsing Bob responses...")
+        logger.info("Parsing Gemini responses...")
         
         # Parse architecture (should be plain Mermaid)
         architecture_mermaid = architecture_raw.strip()
         
-        # Clean up Mermaid if Bob added markdown fences
+        # Clean up Mermaid if Gemini added markdown fences
         if architecture_mermaid.startswith('```'):
             lines = architecture_mermaid.split('\n')
             # Remove first and last lines if they're markdown fences
@@ -177,7 +177,7 @@ async def analyze_repository(request: AnalyzeRequest):
         
         # Parse flows (should be JSON)
         try:
-            # Clean up JSON if Bob added markdown fences
+            # Clean up JSON if Gemini added markdown fences
             flows_json = flows_raw.strip()
             if flows_json.startswith('```'):
                 lines = flows_json.split('\n')
@@ -201,7 +201,7 @@ async def analyze_repository(request: AnalyzeRequest):
             flows = [
                 FlowItem(
                     name="Analysis Error",
-                    description="Could not parse flow information from Bob's response",
+                    description="Could not parse flow information from Gemini's response",
                     steps=["Please try again or check the repository manually"],
                     files=[]
                 )
@@ -227,11 +227,11 @@ async def analyze_repository(request: AnalyzeRequest):
             detail=f"Failed to read repository: {str(e)}"
         )
     
-    except BobClientError as e:
-        logger.error(f"Bob AI error: {str(e)}")
+    except GeminiClientError as e:
+        logger.error(f"Gemini AI error: {str(e)}")
         raise HTTPException(
             status_code=500,
-            detail=f"Failed to get response from Bob AI: {str(e)}"
+            detail=f"Failed to get response from Gemini AI: {str(e)}"
         )
     
     except HTTPException:
@@ -285,4 +285,4 @@ if __name__ == "__main__":
         log_level="info"
     )
 
-# Made with Bob
+# Made with Gemini

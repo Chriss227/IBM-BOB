@@ -1,6 +1,6 @@
 """
 Integration tests for complete analysis flow.
-These tests require Bob API credentials and may take longer to run.
+These tests require Gemini API credentials and may take longer to run.
 """
 import pytest
 from fastapi.testclient import TestClient
@@ -24,8 +24,8 @@ class TestFullAnalysisFlow:
         assert "version" in data
     
     @pytest.mark.skipif(
-        not os.getenv('BOB_API_KEY'),
-        reason="BOB_API_KEY not set - skipping integration test"
+        not os.getenv('GEMINI_API_KEY'),
+        reason="GEMINI_API_KEY not set - skipping integration test"
     )
     def test_complete_analysis_small_repo(self):
         """Test full analysis with a small real repository."""
@@ -96,8 +96,8 @@ class TestFullAnalysisFlow:
         assert response.status_code == 422
     
     @pytest.mark.skipif(
-        not os.getenv('BOB_API_KEY'),
-        reason="BOB_API_KEY not set - skipping integration test"
+        not os.getenv('GEMINI_API_KEY'),
+        reason="GEMINI_API_KEY not set - skipping integration test"
     )
     def test_nonexistent_repository(self):
         """Test handling of non-existent repository."""
@@ -113,8 +113,8 @@ class TestFullAnalysisFlow:
         assert "repository" in data["detail"].lower() or "failed" in data["detail"].lower()
     
     @pytest.mark.skipif(
-        not os.getenv('BOB_API_KEY'),
-        reason="BOB_API_KEY not set - skipping integration test"
+        not os.getenv('GEMINI_API_KEY'),
+        reason="GEMINI_API_KEY not set - skipping integration test"
     )
     @pytest.mark.slow
     def test_concurrent_requests(self):
@@ -159,8 +159,8 @@ class TestFullAnalysisFlow:
         assert "access-control-allow-origin" in response.headers
     
     @pytest.mark.skipif(
-        not os.getenv('BOB_API_KEY'),
-        reason="BOB_API_KEY not set - skipping integration test"
+        not os.getenv('GEMINI_API_KEY'),
+        reason="GEMINI_API_KEY not set - skipping integration test"
     )
     def test_response_time_small_repo(self):
         """Test that small repositories complete within acceptable time."""
@@ -181,8 +181,8 @@ class TestFullAnalysisFlow:
         assert duration < 60, f"Analysis took {duration:.2f}s, expected < 60s"
     
     @pytest.mark.skipif(
-        not os.getenv('BOB_API_KEY'),
-        reason="BOB_API_KEY not set - skipping integration test"
+        not os.getenv('GEMINI_API_KEY'),
+        reason="GEMINI_API_KEY not set - skipping integration test"
     )
     def test_mermaid_diagram_format(self):
         """Test that Mermaid diagram has correct format."""
@@ -206,8 +206,8 @@ class TestFullAnalysisFlow:
         assert "-->" in mermaid or "---" in mermaid
     
     @pytest.mark.skipif(
-        not os.getenv('BOB_API_KEY'),
-        reason="BOB_API_KEY not set - skipping integration test"
+        not os.getenv('GEMINI_API_KEY'),
+        reason="GEMINI_API_KEY not set - skipping integration test"
     )
     def test_flows_structure(self):
         """Test that flows have correct structure."""
@@ -238,8 +238,8 @@ class TestFullAnalysisFlow:
                 assert len(step) > 0
     
     @pytest.mark.skipif(
-        not os.getenv('BOB_API_KEY'),
-        reason="BOB_API_KEY not set - skipping integration test"
+        not os.getenv('GEMINI_API_KEY'),
+        reason="GEMINI_API_KEY not set - skipping integration test"
     )
     def test_guide_structure(self):
         """Test that guide has correct structure."""
@@ -263,4 +263,4 @@ class TestFullAnalysisFlow:
         assert "Gotchas" in guide or "gotchas" in guide.lower() or "non-obvious" in guide.lower()
         assert "first contribution" in guide.lower() or "where to start" in guide.lower()
 
-# Made with Bob
+# Made with Gemini

@@ -1,11 +1,11 @@
 """
-Prompt templates for IBM Bob AI to analyze repository structure and generate documentation.
+Prompt templates for Google Gemini AI to analyze repository structure and generate documentation.
 """
 
 
 def create_architecture_prompt(file_contents: dict) -> str:
     """
-    Create a prompt for Bob to generate a Mermaid architecture diagram.
+    Create a prompt for Gemini to generate a Mermaid architecture diagram.
     
     Args:
         file_contents: Dictionary mapping file paths to their contents
@@ -47,7 +47,7 @@ Return only the Mermaid diagram code, nothing else."""
 
 def create_flows_prompt(file_contents: dict) -> str:
     """
-    Create a prompt for Bob to identify key system flows.
+    Create a prompt for Gemini to identify key system flows.
     
     Args:
         file_contents: Dictionary mapping file paths to their contents
@@ -97,7 +97,7 @@ Return only the JSON object, nothing else."""
 
 def create_guide_prompt(file_contents: dict) -> str:
     """
-    Create a prompt for Bob to generate an onboarding guide.
+    Create a prompt for Gemini to generate an onboarding guide.
     
     Args:
         file_contents: Dictionary mapping file paths to their contents
@@ -175,4 +175,4 @@ if __name__ == "__main__":
     print("=" * 80)
     print(create_guide_prompt(sample_files))
 
-# Made with Bob
+# Made with Gemini

@@ -119,7 +119,7 @@ def test_analyze_bob_api_failure(mock_ask_bob, mock_clone, client, mock_repo_con
     
     assert response.status_code == 500
     data = response.json()
-    assert "Failed to get response from Bob AI" in data["detail"]
+    assert "Failed to get response from Gemini AI" in data["detail"]
 
 
 @patch('backend.main.clone_and_read')

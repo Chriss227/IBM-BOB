@@ -7,7 +7,7 @@ Complete guide for deploying Bob Onboarding Accelerator to production using Rend
 - GitHub account with your repository
 - [Render account](https://render.com/) (free tier available)
 - [Vercel account](https://vercel.com/) (free tier available)
-- IBM Bob API credentials
+- Google Gemini API key
 
 ## 🔧 Backend Deployment (Render)
 
@@ -47,13 +47,18 @@ git push origin main
 In Render dashboard, add these environment variables:
 
 ```
-BOB_API_ENDPOINT=https://us-south.ml.cloud.ibm.com/ml/v1/text/chat?version=2023-05-29
-BOB_API_KEY=your_actual_bob_api_key_here
+GEMINI_API_KEY=your_actual_gemini_api_key_here
 ENVIRONMENT=production
 PYTHON_VERSION=3.11.0
 ```
 
-⚠️ **Important:** Keep your `BOB_API_KEY` secret!
+⚠️ **Important:** Keep your `GEMINI_API_KEY` secret!
+
+**Get your Gemini API key:**
+1. Visit [Google AI Studio](https://aistudio.google.com/app/apikey)
+2. Sign in with your Google account
+3. Click "Create API Key"
+4. Copy the key and add it to Render
 
 ### Step 5: Deploy
 
@@ -240,7 +245,8 @@ vercel --prod
 **API returns 500 errors:**
 - Check environment variables are set correctly
 - View logs in Render dashboard
-- Verify Bob API credentials are valid
+- Verify Gemini API key is valid
+- Check API quota at [Google Cloud Console](https://console.cloud.google.com/)
 
 **Slow cold starts:**
 - Free tier services sleep after inactivity
@@ -330,7 +336,7 @@ vercel --prod
 ```bash
 # Make changes to backend code
 git add backend/
-git commit -m "Update backend"
+git commit -m "Update backend with Gemini"
 git push origin main
 
 # Render auto-deploys
@@ -351,7 +357,7 @@ git push origin main
 
 **Render:**
 1. Dashboard → Service → Environment
-2. Update variables
+2. Update `GEMINI_API_KEY` if needed
 3. Click "Save Changes"
 4. Service will restart automatically
 
