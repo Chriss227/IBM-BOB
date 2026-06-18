@@ -58,7 +58,10 @@ PYTHON_VERSION=3.11.0
 1. Visit [Google AI Studio](https://aistudio.google.com/app/apikey)
 2. Sign in with your Google account
 3. Click "Create API Key"
-4. Copy the key and add it to Render
+4. Copy the key (new keys start with `AQ.`, old keys start with `AIza` - both work)
+5. Add it to Render as `GEMINI_API_KEY`
+
+**Note:** Google updated their API key format. New keys use the `AQ.` prefix (e.g., `AQ.Ab8RN6IxkvazkDr16g5K...`), but the system supports both old (`AIza`) and new (`AQ.`) formats.
 
 ### Step 5: Deploy
 

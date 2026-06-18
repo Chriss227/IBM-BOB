@@ -216,6 +216,8 @@ ENVIRONMENT=development
 3. Click "Create API Key"
 4. Copy and paste into `.env` file
 
+**Note:** New API keys start with `AQ.` (e.g., `AQ.Ab8RN6IxkvazkDr16g5K...`). Old keys starting with `AIza` are also supported.
+
 ### Frontend Environment Variables
 
 For production deployment, set in Vercel:

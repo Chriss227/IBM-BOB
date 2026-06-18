@@ -1,10 +1,16 @@
 """
 Google Gemini API client with retry logic and error handling.
-Replaces IBM Bob API with Google Gemini 2.5 Flash.
+Uses the new google-genai library that supports both old (AIza...) and new (AQ....) API key formats.
+
+Note: Google has updated their API key format:
+- New keys: Start with "AQ." (e.g., AQ.Ab8RN6IxkvazkDr16g5K...)
+- Old keys: Start with "AIza" (still supported for backward compatibility)
+
+Get your API key from: https://aistudio.google.com/app/apikey
 """
 import os
 import asyncio
-import google.generativeai as genai
+from google import genai
 from typing import Optional
 from pathlib import Path
 from dotenv import load_dotenv
@@ -30,7 +36,7 @@ async def ask_gemini(
     Send a prompt to Google Gemini API and get the response.
     
     This function implements:
-    - Direct API key authentication (no IAM tokens needed)
+    - Direct API key authentication (supports new AQ. format)
     - Exponential backoff retry logic (3 attempts)
     - 60 second timeout per request
     - Proper error handling and logging
@@ -54,42 +60,11 @@ async def ask_gemini(
     if not api_key:
         raise GeminiClientError("GEMINI_API_KEY environment variable is not set")
     
-    # Configure Gemini API
-    genai.configure(api_key=api_key)
-    
-    # Create model instance
+    # Create client with new library
     try:
-        model_instance = genai.GenerativeModel(model)
+        client = genai.Client(api_key=api_key)
     except Exception as e:
-        raise GeminiClientError(f"Failed to initialize Gemini model: {str(e)}")
-    
-    # Generation configuration
-    generation_config = {
-        'temperature': 0.7,
-        'max_output_tokens': 2000,
-        'top_p': 0.95,
-        'top_k': 40,
-    }
-    
-    # Safety settings (permissive for code analysis)
-    safety_settings = [
-        {
-            "category": "HARM_CATEGORY_HARASSMENT",
-            "threshold": "BLOCK_NONE"
-        },
-        {
-            "category": "HARM_CATEGORY_HATE_SPEECH",
-            "threshold": "BLOCK_NONE"
-        },
-        {
-            "category": "HARM_CATEGORY_SEXUALLY_EXPLICIT",
-            "threshold": "BLOCK_NONE"
-        },
-        {
-            "category": "HARM_CATEGORY_DANGEROUS_CONTENT",
-            "threshold": "BLOCK_NONE"
-        },
-    ]
+        raise GeminiClientError(f"Failed to initialize Gemini client: {str(e)}")
     
     # Retry logic with exponential backoff
     last_error: Optional[Exception] = None
@@ -98,23 +73,18 @@ async def ask_gemini(
         try:
             print(f"Calling Gemini API (attempt {attempt + 1}/{max_retries})...")
             
-            # Make async API call
+            # Make API call with timeout
             response = await asyncio.wait_for(
-                model_instance.generate_content_async(
-                    prompt,
-                    generation_config=generation_config,
-                    safety_settings=safety_settings
+                asyncio.to_thread(
+                    client.models.generate_content,
+                    model=model,
+                    contents=prompt
                 ),
                 timeout=timeout
             )
             
-            # Check if response was blocked
+            # Check if response has text
             if not response.text:
-                if hasattr(response, 'prompt_feedback'):
-                    feedback = response.prompt_feedback
-                    raise GeminiClientError(
-                        f"Response blocked by safety filters: {feedback}"
-                    )
                 raise GeminiClientError("Gemini API returned empty response")
             
             print(f"Gemini API call successful (response length: {len(response.text)} chars)")
@@ -131,7 +101,7 @@ async def ask_gemini(
             if "api key" in error_msg or "authentication" in error_msg or "unauthorized" in error_msg:
                 raise GeminiClientError(f"Invalid API key or authentication error: {str(e)}")
             
-            # Don't retry on quota/rate limit errors (let user know immediately)
+            # Don't retry on quota/rate limit errors
             if "quota" in error_msg or "rate limit" in error_msg or "429" in error_msg:
                 raise GeminiClientError(f"Rate limit or quota exceeded: {str(e)}")
             
@@ -180,10 +150,20 @@ if __name__ == "__main__":
         print("Testing Gemini API client...\n")
         
         # Check environment variables
-        if not os.getenv('GEMINI_API_KEY'):
+        api_key = os.getenv('GEMINI_API_KEY')
+        if not api_key:
             print("⚠️  GEMINI_API_KEY not set. Please set it in .env file")
             print("   Get your API key from: https://aistudio.google.com/app/apikey")
+            print("   New keys start with 'AQ.' (e.g., AQ.Ab8RN6IxkvazkDr16g5K...)")
+            print("   Old keys start with 'AIza' (both formats are supported)")
             return
+        
+        # Validate API key format
+        if not (api_key.startswith('AQ.') or api_key.startswith('AIza')):
+            print("⚠️  Warning: API key doesn't match expected format")
+            print("   Expected: Starts with 'AQ.' (new) or 'AIza' (old)")
+            print("   Got: Starts with '{}'".format(api_key[:4]))
+            print("   Proceeding anyway, but this may cause authentication errors...")
         
         # Test single prompt
         test_prompt = "Explain what FastAPI is in one sentence."

@@ -26,9 +26,11 @@ This guide helps you migrate your Bob Onboarding Accelerator installation from I
 1. Visit [Google AI Studio](https://aistudio.google.com/app/apikey)
 2. Sign in with your Google account
 3. Click **"Create API Key"**
-4. Copy your API key (starts with `AIza...`)
+4. Copy your API key (starts with `AQ.` - new format)
 
 ⚠️ **Keep this key secret!** Don't share it or commit it to Git.
+
+**Note:** Google has updated their API key format from `AIza...` to `AQ....` The system supports both formats, but new keys will use the `AQ.` prefix.
 
 ### Step 2: Update Your Environment Variables
 
