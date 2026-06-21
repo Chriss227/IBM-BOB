@@ -1,12 +1,12 @@
 """
-Performance tests using Locust for Bob Onboarding Accelerator.
+Performance tests using Locust for Repo Accelerate.
 Run with: locust -f tests/performance/locustfile.py --host=http://localhost:8000
 """
 from locust import HttpUser, task, between
 import random
 
 
-class BobOnboardingUser(HttpUser):
+class RepoAccelerateUser(HttpUser):
     """Simulated user for load testing."""
     
     wait_time = between(1, 3)  # Wait 1-3 seconds between tasks
@@ -91,4 +91,4 @@ class SpikeTestUser(HttpUser):
         for _ in range(5):
             self.client.get("/health")
 
-# Made with Bob
+# Made with Repo Accelerate

@@ -251,5 +251,3 @@ def test_clone_and_read_empty_repo(mock_run):
                 assert "No readable files found" in str(exc_info.value)
     finally:
         shutil.rmtree(temp_dir, ignore_errors=True)
-
-# Made with Bob

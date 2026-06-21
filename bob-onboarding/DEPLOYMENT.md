@@ -1,6 +1,6 @@
 # 🚀 Deployment Guide
 
-Complete guide for deploying Bob Onboarding Accelerator to production using Render (Backend) and Vercel (Frontend).
+Complete guide for deploying Repo Accelerate to production using Render (Backend) and Vercel (Frontend).
 
 ## 📋 Prerequisites
 
@@ -284,7 +284,7 @@ vercel --prod
 
 2. **Enable Caching:**
    - Cache repository clones
-   - Cache Bob AI responses (if appropriate)
+   - Cache Google Gemini responses (if appropriate)
 
 3. **Add Health Checks:**
    - Already configured in `render.yaml`

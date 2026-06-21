@@ -10,7 +10,7 @@ Get your API key from: https://aistudio.google.com/app/apikey
 """
 import os
 import asyncio
-from google import genai
+from google import genai  # pyright: ignore[reportAttributeAccessIssue]
 from typing import Optional
 from pathlib import Path
 from dotenv import load_dotenv
@@ -198,5 +198,3 @@ if __name__ == "__main__":
     asyncio.run(test_gemini_client())
 
 # Made with Gemini
-
-# Made with Bob

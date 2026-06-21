@@ -1,23 +1,29 @@
-"""
-FastAPI backend for Bob Onboarding Accelerator.
-Analyzes GitHub repositories using Google Gemini AI.
-"""
+"""FastAPI backend for Repo Accelerate."""
 import asyncio
 import json
-from typing import Dict, Any
+from typing import Literal
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from pydantic import BaseModel, HttpUrl, validator
+from pydantic import BaseModel, HttpUrl, field_validator
 import logging
 
-from repo_reader import clone_and_read, RepoReaderError
-from gemini_client import ask_gemini, GeminiClientError
-from prompt_templates import (
-    create_architecture_prompt,
-    create_flows_prompt,
-    create_guide_prompt
-)
+try:
+    from .repo_reader import clone_and_read, RepoReaderError
+    from .gemini_client import ask_gemini, GeminiClientError
+    from .prompt_templates import (
+        create_architecture_prompt,
+        create_flows_prompt,
+        create_guide_prompt,
+    )
+except ImportError:  # Support `uvicorn main:app` from the backend directory.
+    from repo_reader import clone_and_read, RepoReaderError
+    from gemini_client import ask_gemini, GeminiClientError
+    from prompt_templates import (
+        create_architecture_prompt,
+        create_flows_prompt,
+        create_guide_prompt,
+    )
 
 # Configure logging
 logging.basicConfig(
@@ -28,9 +34,9 @@ logger = logging.getLogger(__name__)
 
 # Create FastAPI app
 app = FastAPI(
-    title="Bob Onboarding Accelerator",
-    description="Analyze GitHub repositories in under 5 minutes using Google Gemini AI",
-    version="2.0.0"
+    title="Repo Accelerate API",
+    description="Generate architecture maps, system flows, and onboarding guides for public GitHub repositories.",
+    version="3.0.0"
 )
 
 # Configure CORS
@@ -53,8 +59,10 @@ app.add_middleware(
 class AnalyzeRequest(BaseModel):
     """Request model for repository analysis."""
     url: HttpUrl
-    
-    @validator('url')
+    language: Literal["en", "es"] = "en"
+
+    @field_validator("url")
+    @classmethod
     def validate_github_url(cls, v):
         """Ensure URL is a GitHub repository."""
         url_str = str(v)
@@ -78,6 +86,7 @@ class AnalyzeResponse(BaseModel):
     guide: str
     repository_url: str
     files_analyzed: int
+    language: Literal["en", "es"]
 
 
 class HealthResponse(BaseModel):
@@ -101,7 +110,7 @@ async def health_check():
     """
     return HealthResponse(
         status="ok",
-        version="1.0.0"
+        version="3.0.0"
     )
 
 
@@ -129,7 +138,8 @@ async def analyze_repository(request: AnalyzeRequest):
         HTTPException: 400 for invalid URLs, 500 for processing errors
     """
     repo_url = str(request.url)
-    logger.info(f"Starting analysis for repository: {repo_url}")
+    language = request.language
+    logger.info("Starting analysis for repository: %s (language=%s)", repo_url, language)
     
     try:
         # Step 1: Clone and read repository
@@ -145,10 +155,10 @@ async def analyze_repository(request: AnalyzeRequest):
             )
         
         # Step 2: Create prompts
-        logger.info("Creating prompts for Bob...")
-        architecture_prompt = create_architecture_prompt(file_contents)
-        flows_prompt = create_flows_prompt(file_contents)
-        guide_prompt = create_guide_prompt(file_contents)
+        logger.info("Creating analysis prompts...")
+        architecture_prompt = create_architecture_prompt(file_contents, language)
+        flows_prompt = create_flows_prompt(file_contents, language)
+        guide_prompt = create_guide_prompt(file_contents, language)
         
         # Step 3: Call Gemini AI in parallel
         logger.info("Calling Gemini AI (3 parallel requests)...")
@@ -197,12 +207,23 @@ async def analyze_repository(request: AnalyzeRequest):
         except (json.JSONDecodeError, ValueError, KeyError) as e:
             logger.error(f"Failed to parse flows JSON: {str(e)}")
             logger.error(f"Raw flows response: {flows_raw[:500]}")
-            # Provide fallback
+            fallback = {
+                "en": {
+                    "name": "Flow analysis unavailable",
+                    "description": "The structured flow response could not be parsed.",
+                    "step": "Run the analysis again or review the repository manually.",
+                },
+                "es": {
+                    "name": "Análisis de flujos no disponible",
+                    "description": "No se pudo interpretar la respuesta estructurada de flujos.",
+                    "step": "Ejecuta el análisis nuevamente o revisa el repositorio manualmente.",
+                },
+            }[language]
             flows = [
                 FlowItem(
-                    name="Analysis Error",
-                    description="Could not parse flow information from Gemini's response",
-                    steps=["Please try again or check the repository manually"],
+                    name=fallback["name"],
+                    description=fallback["description"],
+                    steps=[fallback["step"]],
                     files=[]
                 )
             ]
@@ -217,7 +238,8 @@ async def analyze_repository(request: AnalyzeRequest):
             flows=flows,
             guide=guide,
             repository_url=repo_url,
-            files_analyzed=files_count
+            files_analyzed=files_count,
+            language=language
         )
         
     except RepoReaderError as e:
@@ -274,7 +296,7 @@ async def internal_error_handler(request: Request, exc: Exception):
 if __name__ == "__main__":
     import uvicorn
     
-    logger.info("Starting Bob Onboarding Accelerator backend...")
+    logger.info("Starting Repo Accelerate backend...")
     logger.info("API documentation available at: http://localhost:8000/docs")
     
     uvicorn.run(
@@ -284,5 +306,3 @@ if __name__ == "__main__":
         reload=True,
         log_level="info"
     )
-
-# Made with Gemini

@@ -1,384 +1,208 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
+import {
+  ArrowRight, BookOpen, Boxes, Check, Clock3, CodeXml, FileCode2,
+  GitBranch, Network, Route, SearchCode, ShieldCheck, Sparkles,
+  Users, Wrench, Zap,
+} from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 
-const Demo = () => {
+const DEMO_REPOS = [
+  {
+    id: 1, name: 'FastAPI', url: 'https://github.com/tiangolo/fastapi',
+    description: 'fastApiDescription', language: 'Python', stars: '70k+',
+    complexity: 'medium', analysisTime: '45s',
+    highlights: ['fastApiHighlight1', 'fastApiHighlight2', 'fastApiHighlight3'],
+  },
+  {
+    id: 2, name: 'Express.js', url: 'https://github.com/expressjs/express',
+    description: 'expressDescription', language: 'JavaScript', stars: '63k+',
+    complexity: 'low', analysisTime: '30s',
+    highlights: ['expressHighlight1', 'expressHighlight2', 'expressHighlight3'],
+  },
+  {
+    id: 3, name: 'Flask', url: 'https://github.com/pallets/flask',
+    description: 'flaskDescription', language: 'Python', stars: '66k+',
+    complexity: 'low', analysisTime: '35s',
+    highlights: ['flaskHighlight1', 'flaskHighlight2', 'flaskHighlight3'],
+  },
+  {
+    id: 4, name: 'Django', url: 'https://github.com/django/django',
+    description: 'djangoDescription', language: 'Python', stars: '76k+',
+    complexity: 'high', analysisTime: '90s',
+    highlights: ['djangoHighlight1', 'djangoHighlight2', 'djangoHighlight3'],
+  },
+];
+
+const FEATURES = [
+  { icon: Network, title: 'architectureTitle', body: 'architectureBody', note: 'architectureNote' },
+  { icon: Route, title: 'flowsTitle', body: 'flowsBody', note: 'flowsNote' },
+  { icon: BookOpen, title: 'guideTitle', body: 'guideBody', note: 'guideNote' },
+  { icon: Zap, title: 'speedTitle', body: 'speedBody', note: 'speedNote' },
+];
+
+const USE_CASES = [
+  { icon: Users, title: 'teamTitle', body: 'teamBody' },
+  { icon: SearchCode, title: 'reviewsTitle', body: 'reviewsBody' },
+  { icon: Wrench, title: 'debtTitle', body: 'debtBody' },
+  { icon: FileCode2, title: 'documentationTitle', body: 'documentationBody' },
+];
+
+const STEPS = [
+  { icon: GitBranch, title: 'step1Title', body: 'step1Body' },
+  { icon: CodeXml, title: 'step2Title', body: 'step2Body' },
+  { icon: Boxes, title: 'step3Title', body: 'step3Body' },
+  { icon: Sparkles, title: 'step4Title', body: 'step4Body' },
+];
+
+function SectionHeading({ title, body }) {
+  return (
+    <header className="mx-auto mb-12 max-w-2xl text-center">
+      <h2 className="font-display text-3xl font-bold text-slate-950 sm:text-4xl">{title}</h2>
+      <p className="mt-4 text-lg leading-7 text-slate-600">{body}</p>
+    </header>
+  );
+}
+
+export default function Demo() {
+  const { t } = useTranslation();
   const [selectedRepo, setSelectedRepo] = useState(null);
-
-  const demoRepos = [
-    {
-      id: 1,
-      name: 'FastAPI',
-      url: 'https://github.com/tiangolo/fastapi',
-      description: 'Modern, fast web framework for building APIs with Python',
-      language: 'Python',
-      stars: '70k+',
-      complexity: 'Medium',
-      analysisTime: '45s',
-      highlights: [
-        'Clean architecture with dependency injection',
-        'Async/await patterns throughout',
-        'Comprehensive test coverage'
-      ]
-    },
-    {
-      id: 2,
-      name: 'Express.js',
-      url: 'https://github.com/expressjs/express',
-      description: 'Fast, unopinionated, minimalist web framework for Node.js',
-      language: 'JavaScript',
-      stars: '63k+',
-      complexity: 'Low',
-      analysisTime: '30s',
-      highlights: [
-        'Middleware-based architecture',
-        'Simple routing system',
-        'Extensive ecosystem'
-      ]
-    },
-    {
-      id: 3,
-      name: 'Flask',
-      url: 'https://github.com/pallets/flask',
-      description: 'Lightweight WSGI web application framework',
-      language: 'Python',
-      stars: '66k+',
-      complexity: 'Low',
-      analysisTime: '35s',
-      highlights: [
-        'Microframework design',
-        'Jinja2 templating',
-        'Built-in development server'
-      ]
-    },
-    {
-      id: 4,
-      name: 'Django',
-      url: 'https://github.com/django/django',
-      description: 'High-level Python web framework',
-      language: 'Python',
-      stars: '76k+',
-      complexity: 'High',
-      analysisTime: '90s',
-      highlights: [
-        'Full-featured ORM',
-        'Admin interface',
-        'Security features built-in'
-      ]
-    }
-  ];
-
-  const features = [
-    {
-      icon: '🏗️',
-      title: 'Architecture Visualization',
-      description: 'Automatic generation of Mermaid diagrams showing system structure and component relationships',
-      demo: 'See how Bob identifies modules, services, and their dependencies'
-    },
-    {
-      icon: '🔄',
-      title: 'Key Flow Analysis',
-      description: 'Identifies the 3 most important workflows in your codebase with step-by-step breakdowns',
-      demo: 'Watch Bob trace request flows, data pipelines, and business logic'
-    },
-    {
-      icon: '📚',
-      title: 'Onboarding Guide',
-      description: 'Complete markdown guide with setup instructions, important files, and contribution tips',
-      demo: 'Get a personalized guide tailored to the repository structure'
-    },
-    {
-      icon: '⚡',
-      title: 'Lightning Fast',
-      description: 'Analysis completes in 30-90 seconds depending on repository size',
-      demo: 'No more spending days understanding a new codebase'
-    }
-  ];
-
-  const useCases = [
-    {
-      title: 'New Team Members',
-      description: 'Reduce onboarding time from days to minutes',
-      icon: '👥'
-    },
-    {
-      title: 'Code Reviews',
-      description: 'Quickly understand PR context and impact',
-      icon: '🔍'
-    },
-    {
-      title: 'Technical Debt',
-      description: 'Identify architectural patterns and improvement areas',
-      icon: '🛠️'
-    },
-    {
-      title: 'Documentation',
-      description: 'Auto-generate up-to-date architecture docs',
-      icon: '📖'
-    }
-  ];
-
-  const steps = [
-    {
-      number: '1',
-      title: 'Paste GitHub URL',
-      description: 'Enter any public GitHub repository URL',
-      icon: '🔗'
-    },
-    {
-      number: '2',
-      title: 'Bob Analyzes',
-      description: 'AI reads and understands the codebase',
-      icon: '🤖'
-    },
-    {
-      number: '3',
-      title: 'Get Insights',
-      description: 'Receive architecture, flows, and guide',
-      icon: '📊'
-    },
-    {
-      number: '4',
-      title: 'Start Coding',
-      description: 'Jump into development immediately',
-      icon: '💻'
-    }
-  ];
+  const copy = (key) => t(`demoFull.${key}`);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
-      {/* Hero Section */}
-      <div className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-purple-600 opacity-10"></div>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 relative">
-          <div className="text-center">
-            <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6">
-              🤖 Bob Onboarding Accelerator
-            </h1>
-            <p className="text-xl md:text-2xl text-gray-600 mb-8 max-w-3xl mx-auto">
-              Understand any GitHub repository in under 5 minutes using IBM Bob AI
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-              <Link
-                to="/"
-                className="px-8 py-4 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors shadow-lg hover:shadow-xl"
-              >
-                Try Live Demo →
-              </Link>
-              <a
-                href="https://github.com/yourusername/bob-onboarding"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="px-8 py-4 bg-white text-gray-800 rounded-lg font-semibold hover:bg-gray-50 transition-colors shadow-lg hover:shadow-xl border-2 border-gray-200"
-              >
-                View on GitHub
-              </a>
-            </div>
+    <main className="overflow-hidden bg-gradient-to-br from-blue-50 via-white to-purple-50">
+      <section className="relative">
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-purple-600 opacity-[0.08]" />
+        <div className="app-container relative py-16 text-center sm:py-20">
+          <div className="mx-auto mb-6 grid h-16 w-16 place-items-center rounded-2xl bg-gradient-to-br from-blue-600 to-purple-600 text-white shadow-xl">
+            <Network size={32} />
           </div>
-
-          {/* Stats */}
-          <div className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-8">
-            <div className="text-center">
-              <div className="text-4xl font-bold text-blue-600">30-90s</div>
-              <div className="text-gray-600 mt-2">Analysis Time</div>
-            </div>
-            <div className="text-center">
-              <div className="text-4xl font-bold text-purple-600">3</div>
-              <div className="text-gray-600 mt-2">Key Flows</div>
-            </div>
-            <div className="text-center">
-              <div className="text-4xl font-bold text-green-600">100%</div>
-              <div className="text-gray-600 mt-2">Automated</div>
-            </div>
-            <div className="text-center">
-              <div className="text-4xl font-bold text-orange-600">5min</div>
-              <div className="text-gray-600 mt-2">To Understand</div>
-            </div>
+          <h1 className="font-display text-4xl font-extrabold tracking-tight text-slate-950 sm:text-6xl">
+            Repo Accelerate
+          </h1>
+          <p className="mx-auto mt-5 max-w-3xl text-lg leading-8 text-slate-600 sm:text-2xl">
+            {copy('heroBody')}
+          </p>
+          <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
+            <Link to="/" className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-8 py-4 font-semibold text-white shadow-lg transition hover:bg-blue-700 hover:shadow-xl">
+              {copy('try')} <ArrowRight size={18} />
+            </Link>
+            <a href="https://github.com/Chriss227/IBM-BOB" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 rounded-lg border-2 border-slate-200 bg-white px-8 py-4 font-semibold text-slate-800 shadow-lg transition hover:bg-slate-50 hover:shadow-xl">
+              <GitBranch size={18} /> {t('demo.viewGithub')}
+            </a>
           </div>
-        </div>
-      </div>
-
-      {/* Features Section */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-        <h2 className="text-4xl font-bold text-center text-gray-900 mb-4">
-          Powerful Features
-        </h2>
-        <p className="text-xl text-gray-600 text-center mb-12 max-w-2xl mx-auto">
-          Everything you need to understand a codebase quickly
-        </p>
-
-        <div className="grid md:grid-cols-2 gap-8">
-          {features.map((feature, index) => (
-            <div
-              key={index}
-              className="bg-white rounded-xl p-8 shadow-lg hover:shadow-xl transition-shadow border border-gray-100"
-            >
-              <div className="text-5xl mb-4">{feature.icon}</div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-3">
-                {feature.title}
-              </h3>
-              <p className="text-gray-600 mb-4">{feature.description}</p>
-              <div className="bg-blue-50 rounded-lg p-4 border-l-4 border-blue-500">
-                <p className="text-sm text-blue-900 font-medium">
-                  {feature.demo}
-                </p>
+          <dl className="mt-16 grid grid-cols-2 gap-8 md:grid-cols-4">
+            {[['30–90s', 'analysisTime'], ['3', 'keyFlows'], ['100%', 'automated'], ['5 min', 'toUnderstand']].map(([value, label], index) => (
+              <div key={label}>
+                <dt className="text-sm font-medium text-slate-600">{copy(label)}</dt>
+                <dd className={`mt-1 text-4xl font-extrabold ${index % 2 ? 'text-purple-600' : 'text-blue-600'}`}>{value}</dd>
               </div>
-            </div>
+            ))}
+          </dl>
+        </div>
+      </section>
+
+      <section className="app-container py-16 sm:py-20">
+        <SectionHeading title={copy('featuresTitle')} body={copy('featuresSubtitle')} />
+        <div className="grid gap-8 md:grid-cols-2">
+          {FEATURES.map(({ icon: Icon, title, body, note }) => (
+            <article key={title} className="rounded-xl border border-slate-100 bg-white p-8 shadow-lg transition hover:-translate-y-1 hover:shadow-xl">
+              <div className="mb-5 grid h-12 w-12 place-items-center rounded-xl bg-blue-50 text-blue-600"><Icon size={25} /></div>
+              <h3 className="font-display text-2xl font-bold text-slate-950">{copy(title)}</h3>
+              <p className="mt-3 leading-7 text-slate-600">{copy(body)}</p>
+              <p className="mt-5 rounded-lg border-l-4 border-blue-500 bg-blue-50 p-4 text-sm font-medium text-blue-950">{copy(note)}</p>
+            </article>
           ))}
         </div>
-      </div>
+      </section>
 
-      {/* Demo Repositories */}
-      <div className="bg-white py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-4xl font-bold text-center text-gray-900 mb-4">
-            Try These Sample Repositories
-          </h2>
-          <p className="text-xl text-gray-600 text-center mb-12">
-            Click any repository to see Bob in action
-          </p>
-
-          <div className="grid md:grid-cols-2 gap-6">
-            {demoRepos.map((repo) => (
-              <div
-                key={repo.id}
-                className={`bg-white rounded-xl p-6 border-2 transition-all cursor-pointer ${
-                  selectedRepo?.id === repo.id
-                    ? 'border-blue-500 shadow-xl'
-                    : 'border-gray-200 hover:border-blue-300 shadow-lg hover:shadow-xl'
-                }`}
-                onClick={() => setSelectedRepo(repo)}
-              >
-                <div className="flex items-start justify-between mb-4">
-                  <div>
-                    <h3 className="text-2xl font-bold text-gray-900 mb-2">
-                      {repo.name}
-                    </h3>
-                    <p className="text-gray-600 text-sm">{repo.description}</p>
-                  </div>
-                  <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">
-                    {repo.language}
-                  </span>
-                </div>
-
-                <div className="flex gap-4 mb-4 text-sm text-gray-600">
-                  <span>⭐ {repo.stars}</span>
-                  <span>📊 {repo.complexity}</span>
-                  <span>⏱️ {repo.analysisTime}</span>
-                </div>
-
-                <div className="space-y-2">
-                  {repo.highlights.map((highlight, idx) => (
-                    <div key={idx} className="flex items-start gap-2">
-                      <span className="text-green-500 mt-1">✓</span>
-                      <span className="text-sm text-gray-700">{highlight}</span>
+      <section className="bg-white py-16 sm:py-20">
+        <div className="app-container">
+          <SectionHeading title={copy('reposTitle')} body={copy('reposSubtitle')} />
+          <div className="grid gap-6 md:grid-cols-2">
+            {DEMO_REPOS.map((repo) => {
+              const selected = selectedRepo === repo.id;
+              return (
+                <article key={repo.id} className={`rounded-xl border-2 bg-white p-6 shadow-lg transition ${selected ? 'border-blue-500 shadow-xl' : 'border-slate-200 hover:border-blue-300 hover:shadow-xl'}`}>
+                  <button type="button" onClick={() => setSelectedRepo(repo.id)} aria-pressed={selected} className="w-full text-left">
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <h3 className="font-display text-2xl font-bold text-slate-950">{repo.name}</h3>
+                        <p className="mt-2 text-sm leading-6 text-slate-600">{copy(`repos.${repo.description}`)}</p>
+                      </div>
+                      <span className="rounded-full bg-blue-100 px-3 py-1 text-sm font-semibold text-blue-800">{repo.language}</span>
                     </div>
-                  ))}
-                </div>
-
-                <Link
-                  to={`/?url=${encodeURIComponent(repo.url)}`}
-                  className="mt-4 block w-full text-center px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors"
-                >
-                  Analyze This Repository →
-                </Link>
-              </div>
-            ))}
+                    <div className="mt-4 flex flex-wrap gap-4 text-sm text-slate-600">
+                      <span className="inline-flex items-center gap-1"><Sparkles size={15} />{repo.stars}</span>
+                      <span className="inline-flex items-center gap-1"><ShieldCheck size={15} />{copy(`repos.${repo.complexity}`)}</span>
+                      <span className="inline-flex items-center gap-1"><Clock3 size={15} />{repo.analysisTime}</span>
+                    </div>
+                    <ul className="mt-4 space-y-2">
+                      {repo.highlights.map((key) => (
+                        <li key={key} className="flex items-start gap-2 text-sm text-slate-700">
+                          <Check size={16} className="mt-0.5 shrink-0 text-emerald-500" /> {copy(`repos.${key}`)}
+                        </li>
+                      ))}
+                    </ul>
+                  </button>
+                  <Link to={`/?url=${encodeURIComponent(repo.url)}`} className="mt-5 flex w-full items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 font-semibold text-white transition hover:bg-blue-700">
+                    {copy('analyzeRepo')} <ArrowRight size={17} />
+                  </Link>
+                </article>
+              );
+            })}
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* Use Cases */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-        <h2 className="text-4xl font-bold text-center text-gray-900 mb-4">
-          Perfect For
-        </h2>
-        <p className="text-xl text-gray-600 text-center mb-12">
-          Multiple scenarios where fast codebase understanding matters
-        </p>
-
-        <div className="grid md:grid-cols-4 gap-6">
-          {useCases.map((useCase, index) => (
-            <div
-              key={index}
-              className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow text-center border border-gray-100"
-            >
-              <div className="text-5xl mb-4">{useCase.icon}</div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">
-                {useCase.title}
-              </h3>
-              <p className="text-gray-600 text-sm">{useCase.description}</p>
-            </div>
+      <section className="app-container py-16 sm:py-20">
+        <SectionHeading title={copy('useCasesTitle')} body={copy('useCasesSubtitle')} />
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          {USE_CASES.map(({ icon: Icon, title, body }) => (
+            <article key={title} className="rounded-xl border border-slate-100 bg-white p-6 text-center shadow-lg">
+              <Icon size={38} className="mx-auto text-purple-600" />
+              <h3 className="mt-4 font-display text-xl font-bold text-slate-950">{copy(title)}</h3>
+              <p className="mt-2 text-sm leading-6 text-slate-600">{copy(body)}</p>
+            </article>
           ))}
         </div>
-      </div>
+      </section>
 
-      {/* How It Works */}
-      <div className="bg-gradient-to-r from-blue-600 to-purple-600 py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-4xl font-bold text-center text-white mb-12">
-            How It Works
-          </h2>
-
-          <div className="grid md:grid-cols-4 gap-8">
-            {steps.map((step, index) => (
-              <div key={index} className="text-center">
-                <div className="bg-white rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-4 shadow-lg">
-                  <span className="text-4xl">{step.icon}</span>
-                </div>
-                <div className="bg-white bg-opacity-20 rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-4">
-                  <span className="text-2xl font-bold text-white">{step.number}</span>
-                </div>
-                <h3 className="text-xl font-bold text-white mb-2">{step.title}</h3>
-                <p className="text-blue-100">{step.description}</p>
-              </div>
+      <section className="bg-gradient-to-r from-blue-600 to-purple-600 py-16 sm:py-20">
+        <div className="app-container">
+          <h2 className="text-center font-display text-4xl font-bold text-white">{copy('processTitle')}</h2>
+          <ol className="mt-12 grid gap-8 md:grid-cols-4">
+            {STEPS.map(({ icon: Icon, title, body }, index) => (
+              <li key={title} className="text-center">
+                <div className="mx-auto grid h-20 w-20 place-items-center rounded-full bg-white text-purple-600 shadow-lg"><Icon size={34} /></div>
+                <span className="mx-auto mt-4 grid h-12 w-12 place-items-center rounded-full bg-white/20 text-2xl font-bold text-white">{index + 1}</span>
+                <h3 className="mt-4 text-xl font-bold text-white">{copy(title)}</h3>
+                <p className="mt-2 leading-6 text-blue-100">{copy(body)}</p>
+              </li>
             ))}
-          </div>
+          </ol>
         </div>
-      </div>
+      </section>
 
-      {/* CTA Section */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-        <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl p-12 text-center shadow-2xl">
-          <h2 className="text-4xl font-bold text-white mb-4">
-            Ready to Accelerate Your Onboarding?
-          </h2>
-          <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
-            Start analyzing repositories now and save hours of onboarding time
-          </p>
-          <Link
-            to="/"
-            className="inline-block px-8 py-4 bg-white text-blue-600 rounded-lg font-semibold hover:bg-gray-100 transition-colors shadow-lg hover:shadow-xl"
-          >
-            Get Started Free →
+      <section className="app-container py-16 sm:py-20">
+        <div className="rounded-2xl bg-gradient-to-r from-blue-600 to-purple-600 p-8 text-center shadow-2xl sm:p-12">
+          <h2 className="font-display text-3xl font-bold text-white sm:text-4xl">{copy('ctaTitle')}</h2>
+          <p className="mx-auto mt-4 max-w-2xl text-lg text-blue-100">{copy('ctaBody')}</p>
+          <Link to="/" className="mt-8 inline-flex items-center gap-2 rounded-lg bg-white px-8 py-4 font-semibold text-blue-600 shadow-lg transition hover:bg-slate-100">
+            {copy('ctaAction')} <ArrowRight size={18} />
           </Link>
         </div>
-      </div>
+      </section>
 
-      {/* Footer */}
-      <div className="bg-gray-900 text-white py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <p className="text-gray-400 mb-4">
-              Built with ❤️ for the IBM Bob Hackathon
-            </p>
-            <div className="flex justify-center gap-6">
-              <a href="#" className="text-gray-400 hover:text-white transition-colors">
-                Documentation
-              </a>
-              <a href="#" className="text-gray-400 hover:text-white transition-colors">
-                GitHub
-              </a>
-              <a href="#" className="text-gray-400 hover:text-white transition-colors">
-                API
-              </a>
-            </div>
+      <footer className="bg-slate-950 py-12 text-center text-slate-400">
+        <div className="app-container">
+          <p>{copy('footer')}</p>
+          <div className="mt-5 flex justify-center gap-6 text-sm">
+            <Link to="/" className="transition hover:text-white">{t('nav.analyzer')}</Link>
+            <a href="https://github.com/Chriss227/IBM-BOB" target="_blank" rel="noopener noreferrer" className="transition hover:text-white">{t('nav.github')}</a>
           </div>
         </div>
-      </div>
-    </div>
+      </footer>
+    </main>
   );
-};
-
-export default Demo;
-
-// Made with Bob
+}

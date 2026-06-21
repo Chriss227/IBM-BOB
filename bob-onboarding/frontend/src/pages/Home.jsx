@@ -1,175 +1,220 @@
-import { useState, useEffect } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router-dom';
+import {
+  AlertCircle,
+  ArrowRight,
+  CheckCircle2,
+  GitBranch,
+  Languages,
+  Network,
+  Route,
+  ScrollText,
+} from 'lucide-react';
 import RepoInput from '../components/RepoInput';
 import ArchDiagram from '../components/ArchDiagram';
 import FlowCards from '../components/FlowCards';
 import GuidePanel from '../components/GuidePanel';
 import { analyzeRepo, ApiError } from '../api';
+import { normalizeLanguage } from '../i18n';
+
+const TABS = [
+  { id: 'architecture', icon: Network, content: (result) => <ArchDiagram mermaid={result.architecture_mermaid} /> },
+  { id: 'flows', icon: Route, content: (result) => <FlowCards flows={result.flows} /> },
+  { id: 'guide', icon: ScrollText, content: (result) => <GuidePanel guide={result.guide} /> },
+];
 
 function Home() {
+  const { t, i18n } = useTranslation();
   const [searchParams] = useSearchParams();
   const [result, setResult] = useState(null);
+  const [lastUrl, setLastUrl] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [activeTab, setActiveTab] = useState('architecture');
+  const autoAnalyzedUrlRef = useRef('');
+  const language = normalizeLanguage(i18n.resolvedLanguage);
 
-  // Auto-analyze if URL is provided in query params
-  useEffect(() => {
-    const urlParam = searchParams.get('url');
-    if (urlParam) {
-      handleAnalyze(urlParam);
-    }
-  }, [searchParams]);
-
-  const handleAnalyze = async (url) => {
+  const handleAnalyze = useCallback(async (url, requestedLanguage = language) => {
     setLoading(true);
     setError(null);
-    setResult(null);
+    setLastUrl(url);
 
     try {
-      const data = await analyzeRepo(url);
+      const data = await analyzeRepo(url, requestedLanguage);
       setResult(data);
-    } catch (err) {
-      if (err instanceof ApiError) {
+      setActiveTab('architecture');
+    } catch (requestError) {
+      if (requestError instanceof ApiError) {
         setError({
-          message: err.message,
-          detail: err.detail,
-          status: err.status
+          message: requestError.message,
+          detail: requestError.detail,
+          status: requestError.status,
         });
       } else {
         setError({
-          message: 'An unexpected error occurred',
-          detail: err.message
+          message: t('errors.unexpected'),
+          detail: requestError.message,
         });
       }
     } finally {
       setLoading(false);
     }
+  }, [language, t]);
+
+  useEffect(() => {
+    const urlParam = searchParams.get('url');
+    if (urlParam && autoAnalyzedUrlRef.current !== urlParam && !result && !loading) {
+      autoAnalyzedUrlRef.current = urlParam;
+      handleAnalyze(urlParam);
+    }
+  }, [handleAnalyze, loading, result, searchParams]);
+
+  const resultLanguage = normalizeLanguage(result?.language);
+  const languageChanged = Boolean(result && resultLanguage !== language);
+  const repositoryName = result?.repository_url?.replace('https://github.com/', '').replace(/\/$/, '');
+  const activePanel = TABS.find((tab) => tab.id === activeTab);
+
+  const handleTabKeyDown = (event, currentIndex) => {
+    if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
+    event.preventDefault();
+    let nextIndex = currentIndex;
+    if (event.key === 'ArrowRight') nextIndex = (currentIndex + 1) % TABS.length;
+    if (event.key === 'ArrowLeft') nextIndex = (currentIndex - 1 + TABS.length) % TABS.length;
+    if (event.key === 'Home') nextIndex = 0;
+    if (event.key === 'End') nextIndex = TABS.length - 1;
+    setActiveTab(TABS[nextIndex].id);
+    document.getElementById(`tab-${TABS[nextIndex].id}`)?.focus();
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-8 px-4">
-      <div className="max-w-7xl mx-auto space-y-8">
-        {/* Header with input */}
+    <main>
+      <div className="app-container py-10 sm:py-14">
         <RepoInput onSubmit={handleAnalyze} loading={loading} />
 
-        {/* Error display */}
-        {error && (
-          <div className="max-w-4xl mx-auto">
-            <div className="bg-red-50 border-2 border-red-200 rounded-lg p-6">
-              <div className="flex">
-                <div className="flex-shrink-0">
-                  <svg className="h-6 w-6 text-red-400" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                  </svg>
+        {error ? (
+          <section className="error-panel" role="alert">
+            <AlertCircle size={22} />
+            <div>
+              <h2>{t('errors.title')}</h2>
+              <p>{error.message}</p>
+              {error.detail && error.detail !== error.message ? (
+                <p className="error-detail">
+                  {t('errors.details')}: {error.detail}
+                </p>
+              ) : null}
+              {error.status === 0 ? (
+                <div className="mt-4">
+                  <strong>{t('errors.troubleshooting')}</strong>
+                  <ul>
+                    <li>{t('errors.backend')}</li>
+                    <li>{t('errors.credentials')}</li>
+                    <li>{t('errors.network')}</li>
+                  </ul>
                 </div>
-                <div className="ml-3 flex-1">
-                  <h3 className="text-lg font-medium text-red-800">
-                    Analysis Failed
-                  </h3>
-                  <p className="mt-2 text-sm text-red-700">
-                    {error.message}
-                  </p>
-                  {error.detail && error.detail !== error.message && (
-                    <p className="mt-1 text-xs text-red-600">
-                      Details: {error.detail}
-                    </p>
-                  )}
-                  {error.status === 0 && (
-                    <div className="mt-4 text-sm text-red-700">
-                      <p className="font-medium">Troubleshooting tips:</p>
-                      <ul className="list-disc list-inside mt-2 space-y-1">
-                        <li>Make sure the backend server is running on port 8000</li>
-                        <li>Check that you've set up the .env file with Bob API credentials</li>
-                        <li>Verify your network connection</li>
-                      </ul>
-                    </div>
-                  )}
-                </div>
-              </div>
+              ) : null}
             </div>
-          </div>
-        )}
+          </section>
+        ) : null}
 
-        {/* Results display */}
-        {result && (
-          <div className="space-y-8 animate-fade-in">
-            {/* Success banner */}
-            <div className="max-w-4xl mx-auto">
-              <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                <div className="flex items-center">
-                  <svg className="h-5 w-5 text-green-400 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                  </svg>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-green-800">
-                      Analysis complete! Analyzed {result.files_analyzed} files from{' '}
-                      <a 
-                        href={result.repository_url} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="underline hover:text-green-900"
-                      >
-                        {result.repository_url.replace('https://github.com/', '')}
-                      </a>
-                    </p>
+        {result ? (
+          <section className="results-shell animate-fade-in" aria-labelledby="results-title">
+            <header className="result-summary">
+              <div className="result-identity">
+                <span className="result-icon">
+                  <GitBranch size={20} />
+                </span>
+                <div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="success-label">
+                      <CheckCircle2 size={14} />
+                      {t('results.complete')}
+                    </span>
+                    <span className="result-meta">{t('results.files', { count: result.files_analyzed })}</span>
                   </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Architecture diagram */}
-            <div className="max-w-6xl mx-auto">
-              <ArchDiagram mermaid={result.architecture_mermaid} />
-            </div>
-
-            {/* Flow cards */}
-            <div className="max-w-6xl mx-auto">
-              <FlowCards flows={result.flows} />
-            </div>
-
-            {/* Onboarding guide */}
-            <div className="max-w-4xl mx-auto">
-              <GuidePanel guide={result.guide} />
-            </div>
-
-            {/* Footer with actions */}
-            <div className="max-w-4xl mx-auto">
-              <div className="card bg-gradient-to-r from-bob-blue to-blue-600 text-white">
-                <div className="text-center">
-                  <h3 className="text-xl font-bold mb-2">
-                    Ready to contribute? 🚀
-                  </h3>
-                  <p className="text-blue-100 mb-4">
-                    You now have everything you need to start working on this project!
+                  <h2 id="results-title">
+                    <a href={result.repository_url} target="_blank" rel="noopener noreferrer">
+                      {repositoryName}
+                    </a>
+                  </h2>
+                  <p>
+                    {t('results.generatedIn', {
+                      language: t(`languages.${resultLanguage}`),
+                    })}
                   </p>
-                  <button
-                    onClick={() => {
-                      setResult(null);
-                      setError(null);
-                    }}
-                    className="bg-white text-bob-blue px-6 py-2 rounded-lg font-semibold hover:bg-gray-100 transition-colors"
-                  >
-                    Analyze Another Repository
-                  </button>
                 </div>
               </div>
-            </div>
-          </div>
-        )}
 
-        {/* Footer */}
-        <footer className="text-center text-sm text-gray-500 pt-8">
-          <p>
-            Powered by{' '}
-            <span className="font-semibold text-bob-blue">IBM Bob AI</span>
-            {' '}• Built for the IBM Bob Hackathon
-          </p>
+              <button
+                type="button"
+                className="secondary-button"
+                onClick={() => {
+                  setResult(null);
+                  setError(null);
+                }}
+              >
+                {t('results.another')}
+                <ArrowRight size={16} />
+              </button>
+            </header>
+
+            {languageChanged ? (
+              <div className="language-notice" role="status">
+                <Languages size={18} />
+                <p>
+                  {t('results.languageWarning', {
+                    language: t(`languages.${resultLanguage}`),
+                  })}
+                </p>
+                <button type="button" onClick={() => handleAnalyze(lastUrl, language)} disabled={loading}>
+                  {t('results.languageWarningAction', {
+                    language: t(`languages.${language}`),
+                  })}
+                </button>
+              </div>
+            ) : null}
+
+            <div className="workspace-tabs" role="tablist" aria-label={t('results.complete')}>
+              {TABS.map((tab, index) => {
+                const Icon = tab.icon;
+                const isActive = activeTab === tab.id;
+                return (
+                  <button
+                    id={`tab-${tab.id}`}
+                    key={tab.id}
+                    type="button"
+                    role="tab"
+                    aria-selected={isActive}
+                    aria-controls={`panel-${tab.id}`}
+                    tabIndex={isActive ? 0 : -1}
+                    className={isActive ? 'workspace-tab-active' : 'workspace-tab'}
+                    onClick={() => setActiveTab(tab.id)}
+                    onKeyDown={(event) => handleTabKeyDown(event, index)}
+                  >
+                    <Icon size={17} />
+                    {t(`results.${tab.id}`)}
+                  </button>
+                );
+              })}
+            </div>
+
+            <div
+              id={`panel-${activeTab}`}
+              role="tabpanel"
+              aria-labelledby={`tab-${activeTab}`}
+              className="workspace-panel"
+            >
+              {activePanel.content(result)}
+            </div>
+          </section>
+        ) : null}
+
+        <footer className="app-footer">
+          <p>{t('footer.powered')}</p>
         </footer>
       </div>
-    </div>
+    </main>
   );
 }
 
 export default Home;
-
-// Made with Bob

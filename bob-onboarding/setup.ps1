@@ -1,7 +1,7 @@
-# Bob Onboarding Accelerator - Quick Setup Script for Windows
+# Repo Accelerate - Quick Setup Script for Windows
 # This script automates the initial setup process
 
-Write-Host "🤖 Bob Onboarding Accelerator - Setup Script" -ForegroundColor Cyan
+Write-Host "🤖 Repo Accelerate - Setup Script" -ForegroundColor Cyan
 Write-Host "=============================================" -ForegroundColor Cyan
 Write-Host ""
 
@@ -58,8 +58,8 @@ if (Test-Path ".env") {
     Copy-Item ".env.example" ".env"
     Write-Host "✓ .env file created" -ForegroundColor Green
     Write-Host ""
-    Write-Host "⚠️  IMPORTANT: Edit backend/.env and add your IBM Bob API credentials!" -ForegroundColor Red
-    Write-Host "   BOB_API_KEY=your_actual_api_key_here" -ForegroundColor Yellow
+    Write-Host "⚠️  IMPORTANT: Edit backend/.env and add your Google Gemini API key!" -ForegroundColor Red
+    Write-Host "   GEMINI_API_KEY=your_actual_api_key_here" -ForegroundColor Yellow
 }
 
 Set-Location ..
@@ -85,7 +85,7 @@ Write-Host "✓ Setup Complete!" -ForegroundColor Green
 Write-Host "=============================================" -ForegroundColor Cyan
 Write-Host ""
 Write-Host "Next Steps:" -ForegroundColor Yellow
-Write-Host "1. Edit backend/.env and add your IBM Bob API credentials" -ForegroundColor White
+Write-Host "1. Edit backend/.env and add your Google Gemini API key" -ForegroundColor White
 Write-Host "2. Start the backend:" -ForegroundColor White
 Write-Host "   cd backend" -ForegroundColor Gray
 Write-Host "   .\venv\Scripts\Activate.ps1" -ForegroundColor Gray
@@ -103,4 +103,4 @@ Write-Host ""
 Write-Host "📖 See DEVELOPMENT.md for detailed instructions" -ForegroundColor Cyan
 Write-Host ""
 
-# Made with Bob
+# Made with Repo Accelerate

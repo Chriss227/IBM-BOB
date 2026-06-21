@@ -1,3 +1,1 @@
-"""Integration tests for Bob Onboarding Accelerator."""
-
-# Made with Bob
+"""Integration tests for Repo Accelerate."""

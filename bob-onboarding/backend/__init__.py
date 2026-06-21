@@ -1,6 +1,3 @@
-"""
-Bob Onboarding Accelerator Backend Package
-"""
-__version__ = "1.0.0"
+"""Repo Accelerate backend package."""
 
-# Made with Bob
+__version__ = "3.0.0"

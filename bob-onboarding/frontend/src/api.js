@@ -1,7 +1,3 @@
-/**
- * API client for communicating with the Bob Onboarding Accelerator backend.
- */
-
 // Use environment variable for API URL, fallback to Render production URL
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://ibm-bob-3.onrender.com';
 
@@ -18,20 +14,19 @@ export class ApiError extends Error {
 }
 
 /**
- * Analyze a GitHub repository using Bob AI.
- * 
  * @param {string} url - GitHub repository URL
+ * @param {'en'|'es'} language - Requested response language
  * @returns {Promise<Object>} Analysis results with architecture, flows, and guide
  * @throws {ApiError} If the request fails
  */
-export async function analyzeRepo(url) {
+export async function analyzeRepo(url, language = 'en') {
   try {
     const response = await fetch(`${API_BASE_URL}/analyze`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ url }),
+      body: JSON.stringify({ url, language }),
     });
 
     // Parse response
@@ -99,5 +94,3 @@ export async function checkHealth() {
     );
   }
 }
-
-// Made with Bob

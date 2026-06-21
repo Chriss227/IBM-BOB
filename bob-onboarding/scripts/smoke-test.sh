@@ -1,5 +1,5 @@
 #!/bin/bash
-# Smoke tests for Bob Onboarding Accelerator
+# Smoke tests for Repo Accelerate
 # Usage: ./scripts/smoke-test.sh <base_url>
 
 set -e
@@ -107,4 +107,4 @@ else
     exit 1
 fi
 
-# Made with Bob
+# Made with Repo Accelerate

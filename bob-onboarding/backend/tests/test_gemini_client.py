@@ -241,5 +241,3 @@ async def test_ask_gemini_timeout_parameter(mock_env_vars):
 
 
 # Made with Gemini
-
-# Made with Bob

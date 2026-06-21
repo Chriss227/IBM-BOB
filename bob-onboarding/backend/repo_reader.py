@@ -136,7 +136,7 @@ def clone_and_read(repo_url: str, max_chars_per_file: int = 3000) -> Dict[str, s
         raise RepoReaderError("URL must start with 'https://github.com/'")
     
     # Create temporary directory
-    temp_dir = tempfile.mkdtemp(prefix='bob_repo_')
+    temp_dir = tempfile.mkdtemp(prefix='repo_accelerate_')
     repo_name = extract_repo_name(repo_url)
     clone_path = Path(temp_dir) / repo_name
     
@@ -226,5 +226,3 @@ if __name__ == "__main__":
             print(f"   Preview: {content[:100]}...")
     except RepoReaderError as e:
         print(f"Error: {e}")
-
-# Made with Bob

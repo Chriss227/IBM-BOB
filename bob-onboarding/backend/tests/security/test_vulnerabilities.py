@@ -1,5 +1,5 @@
 """
-Security tests for Bob Onboarding Accelerator with Gemini.
+Security tests for Repo Accelerate with Gemini.
 Tests for common vulnerabilities and security best practices.
 """
 import pytest
@@ -195,7 +195,7 @@ class TestSecurityVulnerabilities:
         """Test that content type is validated."""
         response = client.post(
             "/analyze",
-            data="url=https://github.com/test/repo",  # Form data instead of JSON
+            content="url=https://github.com/test/repo",  # Form data instead of JSON
             headers={"Content-Type": "application/x-www-form-urlencoded"}
         )
         

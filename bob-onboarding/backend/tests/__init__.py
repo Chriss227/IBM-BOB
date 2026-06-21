@@ -1,3 +1,1 @@
-"""Test suite for Bob Onboarding Accelerator backend."""
-
-# Made with Bob
+"""Test suite for the Repo Accelerate backend."""

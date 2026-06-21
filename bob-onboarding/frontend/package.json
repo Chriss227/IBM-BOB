@@ -1,7 +1,7 @@
 {
-  "name": "bob-onboarding-accelerator",
+  "name": "repo-accelerate",
   "version": "1.0.0",
-  "description": "Analyze GitHub repositories in under 5 minutes using IBM Bob AI",
+  "description": "Generate architecture maps, system flows, and onboarding guides for GitHub repositories",
   "type": "module",
   "packageManager": "pnpm@8.0.0",
   "scripts": {
@@ -17,9 +17,13 @@
     "test:e2e:headed": "playwright test --headed"
   },
   "dependencies": {
+    "i18next": "^26.3.1",
+    "i18next-browser-languagedetector": "^8.2.1",
+    "lucide-react": "^1.21.0",
     "mermaid": "^10.6.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-i18next": "^17.0.8",
     "react-markdown": "^9.0.1",
     "react-router-dom": "^7.15.1"
   },

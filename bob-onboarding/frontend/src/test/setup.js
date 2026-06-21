@@ -9,5 +9,3 @@ afterEach(() => {
 
 // Mock fetch globally
 global.fetch = vi.fn();
-
-// Made with Bob

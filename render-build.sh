@@ -13,5 +13,3 @@ echo "Installing dependencies..."
 pip install --no-cache-dir -r requirements-prod.txt
 
 echo "Build complete!"
-
-# Made with Bob
