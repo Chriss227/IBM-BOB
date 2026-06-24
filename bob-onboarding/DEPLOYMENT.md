@@ -48,8 +48,10 @@ In Render dashboard, add these environment variables:
 
 ```
 GEMINI_API_KEY=your_actual_gemini_api_key_here
+GEMINI_API_KEY_FALLBACK=your_fallback_gemini_api_key_here
 ENVIRONMENT=production
 PYTHON_VERSION=3.11.0
+FRONTEND_URL=https://your-vercel-app.vercel.app
 ```
 
 ⚠️ **Important:** Keep your `GEMINI_API_KEY` secret!

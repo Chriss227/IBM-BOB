@@ -1,6 +1,7 @@
 """FastAPI backend for Repo Accelerate."""
 import asyncio
 import json
+import os
 from typing import Literal
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -40,15 +41,21 @@ app = FastAPI(
 )
 
 # Configure CORS
+frontend_url = os.getenv("FRONTEND_URL", "").rstrip("/")
+allowed_origins = [
+    "http://localhost:5173",  # Vite dev server
+    "http://127.0.0.1:5173",
+    "http://localhost:3000",  # Alternative port
+    "https://ibm-bob-zeta.vercel.app",  # Existing Vercel production
+]
+
+if frontend_url:
+    allowed_origins.append(frontend_url)
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",  # Vite dev server
-        "http://127.0.0.1:5173",
-        "http://localhost:3000",  # Alternative port
-        "https://ibm-bob-zeta.vercel.app",  # Vercel production
-        "https://*.vercel.app",  # All Vercel preview deployments
-    ],
+    allow_origins=allowed_origins,
+    allow_origin_regex=r"https://.*\.vercel\.app",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

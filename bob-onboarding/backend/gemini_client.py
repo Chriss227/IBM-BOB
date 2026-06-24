@@ -15,15 +15,119 @@ from typing import Optional
 from pathlib import Path
 from dotenv import load_dotenv
 
-# Load environment variables from project root
-project_root = Path(__file__).parent.parent
-env_path = project_root / '.env'
-load_dotenv(dotenv_path=env_path)
+# Load environment variables from the backend folder and project root.
+backend_dir = Path(__file__).parent
+project_root = backend_dir.parent
+load_dotenv(dotenv_path=backend_dir / '.env')
+load_dotenv(dotenv_path=project_root / '.env')
 
 
 class GeminiClientError(Exception):
     """Custom exception for Gemini API client errors."""
     pass
+
+
+def _get_api_keys() -> list[tuple[str, str]]:
+    """Return configured Gemini API keys in priority order."""
+    keys = [
+        ("primary", os.getenv('GEMINI_API_KEY')),
+        ("fallback", os.getenv('GEMINI_API_KEY_FALLBACK')),
+    ]
+    return [(name, key) for name, key in keys if key]
+
+
+def _should_try_fallback(error: Exception) -> bool:
+    """Use a fallback key for auth, quota, rate limit, and transient failures."""
+    error_msg = str(error).lower()
+    return any(
+        token in error_msg
+        for token in (
+            "api key",
+            "authentication",
+            "unauthorized",
+            "quota",
+            "rate limit",
+            "429",
+            "permission",
+            "temporarily",
+            "unavailable",
+            "timeout",
+            "deadline",
+            "connection",
+            "network",
+            "500",
+            "503",
+        )
+    )
+
+
+async def _generate_with_key(
+    api_key: str,
+    key_label: str,
+    prompt: str,
+    model: str,
+    timeout: int,
+    max_retries: int,
+) -> str:
+    """Call Gemini with a single API key."""
+    try:
+        client = genai.Client(api_key=api_key)
+    except Exception as e:
+        raise GeminiClientError(f"Failed to initialize Gemini client with {key_label} key: {str(e)}")
+
+    last_error: Optional[Exception] = None
+
+    for attempt in range(max_retries):
+        try:
+            print(f"Calling Gemini API with {key_label} key (attempt {attempt + 1}/{max_retries})...")
+
+            response = await asyncio.wait_for(
+                asyncio.to_thread(
+                    client.models.generate_content,
+                    model=model,
+                    contents=prompt
+                ),
+                timeout=timeout
+            )
+
+            if not response.text:
+                raise GeminiClientError("Gemini API returned empty response")
+
+            print(f"Gemini API call successful (response length: {len(response.text)} chars)")
+            return response.text
+
+        except asyncio.TimeoutError:
+            last_error = GeminiClientError(f"Request timed out after {timeout} seconds")
+            print(f"Attempt {attempt + 1} with {key_label} key failed: Timeout")
+
+        except Exception as e:
+            error_msg = str(e).lower()
+
+            if "safety" in error_msg or "blocked" in error_msg:
+                raise GeminiClientError(f"Content blocked by safety filters: {str(e)}")
+
+            last_error = GeminiClientError(str(e))
+            print(f"Attempt {attempt + 1} with {key_label} key failed: {str(e)}")
+
+            if (
+                "api key" in error_msg
+                or "authentication" in error_msg
+                or "unauthorized" in error_msg
+                or "quota" in error_msg
+                or "rate limit" in error_msg
+                or "429" in error_msg
+            ):
+                raise last_error
+
+        if attempt < max_retries - 1:
+            wait_time = 2 ** attempt
+            print(f"Waiting {wait_time}s before retry...")
+            await asyncio.sleep(wait_time)
+
+    raise GeminiClientError(
+        f"Failed with {key_label} key after {max_retries} attempts. "
+        f"Last error: {str(last_error)}"
+    )
 
 
 async def ask_gemini(
@@ -54,73 +158,36 @@ async def ask_gemini(
     Raises:
         GeminiClientError: If the API call fails after all retries
     """
-    # Get API key from environment
-    api_key = os.getenv('GEMINI_API_KEY')
-    
-    if not api_key:
+    api_keys = _get_api_keys()
+
+    if not api_keys:
         raise GeminiClientError("GEMINI_API_KEY environment variable is not set")
-    
-    # Create client with new library
-    try:
-        client = genai.Client(api_key=api_key)
-    except Exception as e:
-        raise GeminiClientError(f"Failed to initialize Gemini client: {str(e)}")
-    
-    # Retry logic with exponential backoff
+
     last_error: Optional[Exception] = None
-    
-    for attempt in range(max_retries):
+
+    for index, (key_label, api_key) in enumerate(api_keys):
         try:
-            print(f"Calling Gemini API (attempt {attempt + 1}/{max_retries})...")
-            
-            # Make API call with timeout
-            response = await asyncio.wait_for(
-                asyncio.to_thread(
-                    client.models.generate_content,
-                    model=model,
-                    contents=prompt
-                ),
-                timeout=timeout
+            return await _generate_with_key(
+                api_key=api_key,
+                key_label=key_label,
+                prompt=prompt,
+                model=model,
+                timeout=timeout,
+                max_retries=max_retries,
             )
-            
-            # Check if response has text
-            if not response.text:
-                raise GeminiClientError("Gemini API returned empty response")
-            
-            print(f"Gemini API call successful (response length: {len(response.text)} chars)")
-            return response.text
-            
-        except asyncio.TimeoutError:
-            last_error = GeminiClientError(f"Request timed out after {timeout} seconds")
-            print(f"Attempt {attempt + 1} failed: Timeout")
-            
-        except Exception as e:
-            error_msg = str(e).lower()
-            
-            # Don't retry on authentication errors
-            if "api key" in error_msg or "authentication" in error_msg or "unauthorized" in error_msg:
-                raise GeminiClientError(f"Invalid API key or authentication error: {str(e)}")
-            
-            # Don't retry on quota/rate limit errors
-            if "quota" in error_msg or "rate limit" in error_msg or "429" in error_msg:
-                raise GeminiClientError(f"Rate limit or quota exceeded: {str(e)}")
-            
-            # Handle safety filter blocks
-            if "safety" in error_msg or "blocked" in error_msg:
-                raise GeminiClientError(f"Content blocked by safety filters: {str(e)}")
-            
-            last_error = GeminiClientError(f"Unexpected error: {str(e)}")
-            print(f"Attempt {attempt + 1} failed: {str(e)}")
-        
-        # Wait before retrying (exponential backoff)
-        if attempt < max_retries - 1:
-            wait_time = 2 ** attempt  # 1s, 2s, 4s
-            print(f"Waiting {wait_time}s before retry...")
-            await asyncio.sleep(wait_time)
-    
-    # All retries failed
+
+        except GeminiClientError as e:
+            last_error = e
+            has_next_key = index < len(api_keys) - 1
+
+            if has_next_key and _should_try_fallback(e):
+                print(f"Gemini {key_label} key failed; trying fallback key...")
+                continue
+
+            raise
+
     raise GeminiClientError(
-        f"Failed to get response from Gemini after {max_retries} attempts. "
+        "Failed to get response from Gemini with all configured API keys. "
         f"Last error: {str(last_error)}"
     )
 

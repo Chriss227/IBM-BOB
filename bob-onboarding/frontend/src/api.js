@@ -1,5 +1,5 @@
-// Use environment variable for API URL, fallback to Render production URL
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://ibm-bob-3.onrender.com';
+// Use VITE_API_URL in production. Local development defaults to the FastAPI port.
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
 
 /**
  * Custom error class for API errors.
@@ -52,7 +52,7 @@ export async function analyzeRepo(url, language = 'en') {
     // Handle network errors
     if (error instanceof TypeError && error.message.includes('fetch')) {
       throw new ApiError(
-        'Cannot connect to backend server. Make sure it is running on port 8000.',
+        `Cannot connect to backend server at ${API_BASE_URL}. Configure VITE_API_URL in Vercel or start the local backend.`,
         0,
         'Network error'
       );
@@ -88,7 +88,7 @@ export async function checkHealth() {
     }
 
     throw new ApiError(
-      'Cannot connect to backend server',
+      `Cannot connect to backend server at ${API_BASE_URL}`,
       0,
       'Network error'
     );

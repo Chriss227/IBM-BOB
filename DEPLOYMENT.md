@@ -15,6 +15,8 @@ Required environment variable:
 
 ```dotenv
 GEMINI_API_KEY=your_key
+GEMINI_API_KEY_FALLBACK=your_fallback_key
+FRONTEND_URL=https://your-vercel-app.vercel.app
 ```
 
 ## Frontend on Vercel
